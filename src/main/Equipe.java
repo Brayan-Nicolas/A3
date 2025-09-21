@@ -1,5 +1,10 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import usuário.Usuario;
+
 public class Equipe {
 
     private String nome;

@@ -1,6 +1,6 @@
 package main.Projeto;
 
-private enum StatusProjeto {
+public enum StatusProjeto {
     PLANEJAMENTO,
     ANDAMENTO,
     CONCLUIDO,
