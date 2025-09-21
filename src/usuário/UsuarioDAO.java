@@ -11,7 +11,7 @@ public class UsuarioDAO {
 	private Connection conectar() {
 	     try {
 	         // Configuração do banco (MySQL neste exemplo)
-	         String url = "jdbc:mysql://192.168.18.1:3306/sistema";
+	         String url = "jdbc:mysql://localhost:3306/sistema";
 	         String user = "root";
 	         String password = "root"; // coloque a senha do seu MySQL
 	         return DriverManager.getConnection(url, user, password);
@@ -37,8 +37,6 @@ public class UsuarioDAO {
 	         stmt.setString(7, usuario.getNivel().toString());
 	
 	         stmt.executeUpdate();
-	         usuario.setId(stmt.getGeneratedKeys().getInt("id"));
-	         System.out.println(usuario.getId());
 	         stmt.close();
 	         conn.close();
 	         return true;
