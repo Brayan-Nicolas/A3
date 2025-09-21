@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 
 import main.ProgramaGestão;
 import main.DatabaseDAO;
+import usuário.Nivel;
 import usuário.Usuario;
 
 public class RegistroUsuário extends JFrame {
@@ -83,24 +84,13 @@ public class RegistroUsuário extends JFrame {
         String login = txtLogin.getText();
         String senha = new String(txtSenha.getPassword());
 
-        Usuario usuario = new Usuario(nome, cpf, email, cargo, login, senha, Usuario.Nivel.COLABORADOR);
+        ProgramaGestão.usuario = new Usuario(nome, cpf, email, cargo, login, senha, Nivel.COLABORADOR);
 
-        DatabaseDAO dao = new DatabaseDAO();
-        if (dao.criarUsuário(usuario)) {
+        if (DatabaseDAO.criarUsuário(ProgramaGestão.usuario)) {
             JOptionPane.showMessageDialog(this, "Usuário cadastrado com sucesso!");
-            limparCampos();
-        } else {
-            JOptionPane.showMessageDialog(this, "Erro ao cadastrar usuário.");
+            ProgramaGestão.currentWindow = new PainelPrincipal();
+            this.dispose();
         }
-    }
-
-    private void limparCampos() {
-        txtNome.setText("");
-        txtCpf.setText("");
-        txtEmail.setText("");
-        txtCargo.setText("");
-        txtLogin.setText("");
-        txtSenha.setText("");
     }
 
     public static void main(String[] args) {

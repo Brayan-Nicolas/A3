@@ -1,25 +1,25 @@
 package guis;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import main.DatabaseDAO;
+import main.ProgramaGestão;
 
 public class InterfaceLogin extends JFrame {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private JTextField txtUsuário;
+	private JTextField txtUsuario;
 	private JPasswordField txtSenha;
 	private JButton entrar, registrar;
 	
@@ -39,11 +39,11 @@ public class InterfaceLogin extends JFrame {
 		gbc.gridwidth = 1;
 		gbc.fill = GridBagConstraints.NONE;
 		add(new JLabel("Login: "), gbc);
-		txtUsuário = new JTextField();
+		txtUsuario = new JTextField();
 		gbc.gridx = 1;
 		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		add(txtUsuário, gbc);
+		add(txtUsuario, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 1;
@@ -67,13 +67,19 @@ public class InterfaceLogin extends JFrame {
 		add(registrar, gbc);
 		
 		entrar.addActionListener(e -> {
-			/* TODO painel principal
-			* this.dispose();
-			*/
+			if (verificarSenha(txtUsuario.getText(), new String(txtSenha.getPassword()))) {
+				DatabaseDAO.recuperarUsuário(Integer.parseInt(DatabaseDAO.getValor("id", "login", txtUsuario.getText())));
+				JOptionPane.showMessageDialog(ProgramaGestão.currentWindow, "Login feito com sucesso!", "Sucesso!", JOptionPane.INFORMATION_MESSAGE);
+				ProgramaGestão.currentWindow = new PainelPrincipal();
+				this.dispose();
+			} else {
+				JOptionPane.showMessageDialog(ProgramaGestão.currentWindow, "Usuário ou senha incorretos.", "Falha no login.", JOptionPane.ERROR_MESSAGE);
+			}
+			
 		});
 		
 		registrar.addActionListener(e -> {
-			new RegistroUsuário();
+			ProgramaGestão.currentWindow = new RegistroUsuário();
 			this.dispose();
 		});
 		
@@ -81,5 +87,10 @@ public class InterfaceLogin extends JFrame {
         setSize(400, 200);
         setLocationRelativeTo(null); // Centralizar
         setVisible(true);
+	}
+
+	// Valida a senha inserida
+	private boolean verificarSenha(String login, String pass) {
+		return DatabaseDAO.getValor("senha", "login", login).equals(pass);
 	}
 }

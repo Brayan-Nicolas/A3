@@ -1,12 +1,17 @@
 package main;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.sql.*;
+import java.awt.Component;
+
+import guis.InterfaceLogin;
+import usuário.Usuario;
 
 public class ProgramaGestão {
-	public static void Main(String args[]) {
+	public static Usuario usuario;
+	DatabaseDAO db = new DatabaseDAO();
+	public static Component currentWindow;
+	
+	public static void main(String args[]) {
+		currentWindow = new InterfaceLogin();
 		
 	}
 }
