@@ -3,7 +3,7 @@ package usuário;
 public class Usuario {
 	
     private String nome, cpf, email, cargo, login, senha;
-    private int id;
+    private long id;
     private Nivel nivel;
 
     public Usuario(String nome, String cpf, String email, String cargo, String login, String senha, Nivel nivel) {
@@ -16,7 +16,16 @@ public class Usuario {
         this.nivel = nivel;
     }
 
-    // Getters
+    public Usuario(long id, String nome, String cpf, String email, String cargo, Nivel nivel) {
+    	this.id = id;
+    	this.nome = nome;
+        this.cpf = cpf;
+        this.email = email;
+        this.cargo = cargo;
+        this.nivel = nivel;
+	}
+
+	// Getters
     public String getNome() { return nome; }
     public String getCpf() { return cpf; }
     public String getEmail() { return email; }

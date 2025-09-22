@@ -232,7 +232,7 @@ public class DatabaseDAO {
 			String senha = set.getString("senha");
 			Nivel nivel = Nivel.valueOf(set.getString("nivel"));
 			
-			ProgramaGestão.usuario = new Usuario(nome, cpf, email, cargo, login, senha, nivel);
+			ProgramaGestão.usuarioAtual = new Usuario(nome, cpf, email, cargo, login, senha, nivel);
 			
 			stmt.close();
 			conn.close();

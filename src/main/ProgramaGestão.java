@@ -6,7 +6,7 @@ import guis.InterfaceLogin;
 import usuário.Usuario;
 
 public class ProgramaGestão {
-	public static Usuario usuario;
+	public static Usuario usuarioAtual;
 	DatabaseDAO db = new DatabaseDAO();
 	public static Component currentWindow;
 	

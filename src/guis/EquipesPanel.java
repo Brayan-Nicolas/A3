@@ -1,14 +1,20 @@
 package guis;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.util.ArrayList; // Para simular o serviço
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
 import main.Equipe;
 import usuário.Nivel;
 import usuário.Usuario;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
-import java.util.ArrayList; // Para simular o serviço
 
 public class EquipesPanel extends JPanel {
 
@@ -32,7 +38,7 @@ public class EquipesPanel extends JPanel {
         // --- 2. Lógica de Permissões para os Botões ---
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        if (usuarioLogado.getNivel() == Nivel.ADMIN || usuarioLogado.getNivel() == Nivel.GERENTE) {
+        if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR || usuarioLogado.getNivel() == Nivel.GERENTE) {
             JButton btnNovaEquipe = new JButton("Nova Equipe");
             JButton btnGerenciarMembros = new JButton("Gerenciar Membros");
 
@@ -57,10 +63,9 @@ public class EquipesPanel extends JPanel {
         List<Equipe> equipesDisponiveis = new ArrayList<>();
 
         // Dados fictícios, que na vida real viriam do banco de dados
-        Usuario admin = new Usuario(1L, "Admin Geral", "123", "admin@a.com", Nivel.ADMIN, "adm", "123");
-        Usuario gerente = new Usuario(2L, "Gerente Equipe A", "456", "gerente@a.com", Nivel.GERENTE, "gerente_a", "123");
-        Usuario colaborador = new Usuario(3L, "Colaborador B", "789", "colab@b.com", Nivel.COLABORADOR, "colab_b",
-                "123");
+        Usuario admin = new Usuario(1L, "Admin Geral", "123", "admin@a.com", "Administrador", Nivel.ADMINISTRADOR);
+        Usuario gerente = new Usuario(2L, "Gerente Equipe A", "456", "gerente@a.com", "Gerente", Nivel.GERENTE);
+        Usuario colaborador = new Usuario(3L, "Colaborador B", "789", "colab@b.com", "Colaborador", Nivel.COLABORADOR);
 
         Equipe equipeA = new Equipe(10L, "Equipe A");
         equipeA.adicionarMembro(admin);
@@ -71,7 +76,7 @@ public class EquipesPanel extends JPanel {
         equipeB.adicionarMembro(colaborador);
 
         // Lógica de filtro movida do serviço
-        if (usuarioLogado.getNivel() == Nivel.ADMIN) {
+        if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
             equipesDisponiveis.add(equipeA);
             equipesDisponiveis.add(equipeB);
         } else {

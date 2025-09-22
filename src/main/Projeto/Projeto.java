@@ -1,11 +1,11 @@
 package main.Projeto;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import usuario.Usuario;
 import main.Equipe;
+import usuário.Usuario;
 
 public class Projeto {
 

@@ -84,9 +84,9 @@ public class RegistroUsuário extends JFrame {
         String login = txtLogin.getText();
         String senha = new String(txtSenha.getPassword());
 
-        ProgramaGestão.usuario = new Usuario(nome, cpf, email, cargo, login, senha, Nivel.COLABORADOR);
+        ProgramaGestão.usuarioAtual = new Usuario(nome, cpf, email, cargo, login, senha, Nivel.COLABORADOR);
 
-        if (DatabaseDAO.criarUsuário(ProgramaGestão.usuario)) {
+        if (DatabaseDAO.criarUsuário(ProgramaGestão.usuarioAtual)) {
             JOptionPane.showMessageDialog(this, "Usuário cadastrado com sucesso!");
             ProgramaGestão.currentWindow = new PainelPrincipal();
             this.dispose();

@@ -18,6 +18,11 @@ public class Equipe {
         this.descricao = descricao;
         this.membros = new ArrayList<>();
     }
+    
+    public Equipe(long id, String nome) {
+    	this.id = id;
+    	this.nome = nome;
+    }
 
     // Métodos de Gerenciamento de Membros
     public void adicionarMembro(Usuario novoMembro) {
@@ -52,4 +57,8 @@ public class Equipe {
     public String toString() {
         return this.nome;
     }
+
+	public long getId() {
+		return this.id;
+	}
 }
