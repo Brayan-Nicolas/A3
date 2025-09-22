@@ -163,7 +163,10 @@ public class DatabaseDAO {
         
         if (stmt.execute()) {
         	stmt.getResultSet().next();
-        	return stmt.getResultSet().getString(1);
+        	String retorno = stmt.getResultSet().getString(1);
+			stmt.close();
+			conn.close();
+			return retorno;
         }
         return null;
         } catch (SQLException e) {
@@ -190,8 +193,10 @@ public class DatabaseDAO {
         	
         	if (stmt.execute()) {
             	stmt.getResultSet().next();
-            	return stmt.getResultSet().getString(1);
-            	
+            	String retorno = stmt.getResultSet().getString(1);
+    			stmt.close();
+    			conn.close();
+    			return retorno;
             }
             return null;
         	
@@ -229,6 +234,8 @@ public class DatabaseDAO {
 			
 			ProgramaGestão.usuario = new Usuario(nome, cpf, email, cargo, login, senha, nivel);
 			
+			stmt.close();
+			conn.close();
 			return true;
 			
 		} catch (SQLException e) {
