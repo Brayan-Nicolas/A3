@@ -7,28 +7,19 @@ import usuário.Usuario;
 
 public class Equipe {
 
+    private long id; // Adicionado para identificação única
     private String nome;
     private String descricao;
     private List<Usuario> membros;
 
-    /**
-     * Construtor para criar uma nova equipe.
-     *
-     * @param nome      O nome da equipe.
-     * @param descricao A descrição da equipe.
-     */
-    public Equipe(String nome, String descricao) {
+    public Equipe(long id, String nome, String descricao) {
+        this.id = id;
         this.nome = nome;
         this.descricao = descricao;
-        this.membros = new ArrayList<>(); // Inicializa a lista de membros vazia
+        this.membros = new ArrayList<>();
     }
 
-    // --- Métodos de Gerenciamento de Membros ---
-    /**
-     * Adiciona um novo usuário à equipe.
-     *
-     * @param novoMembro O usuário a ser adicionado.
-     */
+    // Métodos de Gerenciamento de Membros
     public void adicionarMembro(Usuario novoMembro) {
         if (novoMembro != null && !this.membros.contains(novoMembro)) {
             this.membros.add(novoMembro);
@@ -36,11 +27,6 @@ public class Equipe {
         }
     }
 
-    /**
-     * Remove um membro da equipe.
-     *
-     * @param membro O usuário a ser removido.
-     */
     public void removerMembro(Usuario membro) {
         if (membro != null && this.membros.contains(membro)) {
             this.membros.remove(membro);
@@ -48,9 +34,7 @@ public class Equipe {
         }
     }
 
-    // --- Métodos de Acesso (Getters) ---
-    // Note que não há setters para a lista de membros, pois a gestão
-    // é feita pelos métodos adicionar/remover, garantindo segurança.
+    // Getters
     public String getNome() {
         return nome;
     }
@@ -63,4 +47,9 @@ public class Equipe {
         return membros;
     }
 
+    // Método crucial para a GUI
+    @Override
+    public String toString() {
+        return this.nome;
+    }
 }

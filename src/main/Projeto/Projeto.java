@@ -1,8 +1,11 @@
 package main.Projeto;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.ArrayList;
 
-import usuário.Usuario;
+import usuario.Usuario;
+import main.Equipe;
 
 public class Projeto {
 
@@ -12,16 +15,18 @@ public class Projeto {
     private LocalDate dataDeTerminoPrevisto;
     private StatusProjeto status;
     private Usuario gerente;
+    private List<Equipe> equipes;
 
     // Construtor para inicializar um novo projeto
     public Projeto(String nome, String descricao, LocalDate dataDeInicio,
-            LocalDate dataDeTerminoPrevisto, Usuario gerente) {
+            LocalDate dataDeTerminoPrevisto, Usuario gerente, List<Equipe> equipes) {
         this.nome = nome;
         this.descricao = descricao;
         this.dataDeInicio = dataDeInicio;
         this.dataDeTerminoPrevisto = dataDeTerminoPrevisto;
         this.gerente = gerente;
-        this.status = StatusProjeto.PLANEJAMENTO; // O status inicial de todo projeto é Planejamento
+        this.equipes = equipes; // CORRIGIDO: Ponto e vírgula
+        this.status = StatusProjeto.PLANEJAMENTO;
     }
 
     public String getNome() {
@@ -64,4 +69,18 @@ public class Projeto {
         return gerente;
     }
 
+    public List<Equipe> getEquipes() {
+        return equipes;
+    }
+
+    public void setEquipes(List<Equipe> equipes) {
+        this.equipes = equipes; // CORRIGIDO: Ponto e vírgula
+    }
+
+    public void adicionarEquipe(Equipe novaEquipe) {
+        if (this.equipes == null) {
+            this.equipes = new ArrayList<>();
+        }
+        this.equipes.add(novaEquipe);
+    }
 }
