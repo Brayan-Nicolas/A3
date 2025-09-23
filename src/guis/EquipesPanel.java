@@ -13,6 +13,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import main.Equipe;
+import main.ProgramaGestão;
 import usuário.Nivel;
 import usuário.Usuario;
 
@@ -32,7 +33,9 @@ public class EquipesPanel extends JPanel {
         String[] colunas = { "ID", "Nome da Equipe", "Membros" }; 
         modeloTabela = new DefaultTableModel(colunas, 0);
         tabelaEquipes = new JTable(modeloTabela);
+        tabelaEquipes.setDefaultEditor(Object.class, null);
         JScrollPane scrollPane = new JScrollPane(tabelaEquipes);
+        
         add(scrollPane, BorderLayout.CENTER);
 
         // --- 2. Lógica de Permissões para os Botões ---
@@ -70,6 +73,7 @@ public class EquipesPanel extends JPanel {
         Equipe equipeA = new Equipe(10L, "Equipe A");
         equipeA.adicionarMembro(admin);
         equipeA.adicionarMembro(gerente);
+        equipeA.adicionarMembro(ProgramaGestão.usuarioAtual);
 
         Equipe equipeB = new Equipe(11L, "Equipe B");
         equipeB.adicionarMembro(admin);

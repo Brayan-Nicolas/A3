@@ -91,6 +91,8 @@ public class InterfaceLogin extends JFrame {
 
 	// Valida a senha inserida
 	private boolean verificarSenha(String login, String pass) {
-		return DatabaseDAO.getValor("senha", "login", login).equals(pass);
+		String retorno = DatabaseDAO.getValor("senha", "login", login);
+		if (retorno == null) return false; 
+		else return retorno.equals(pass);
 	}
 }

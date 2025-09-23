@@ -33,7 +33,7 @@ public class Usuario {
     public String getLogin() { return login; }
     public String getSenha() { return senha; }
     public Nivel getNivel() { return nivel; }
-    public int getId() { return id; }
+    public long getId() { return id; }
     
     public void setId(int id) {
     	this.id = id;

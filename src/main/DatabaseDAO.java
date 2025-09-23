@@ -84,7 +84,7 @@ public class DatabaseDAO {
 	    	PreparedStatement stmt = conn.prepareStatement(sql);
 	    	stmt.setString(1, campo);
 	    	stmt.setString(2, valor);
-	    	stmt.setInt(3, usuario.getId());
+	    	stmt.setInt(3, (int) usuario.getId());
 	    	
 	    	stmt.executeUpdate();
 	    	stmt.close();
@@ -161,8 +161,7 @@ public class DatabaseDAO {
         stmt.setString(1, campo);
         stmt.setInt(2, userId);
         
-        if (stmt.execute()) {
-        	stmt.getResultSet().next();
+        if (stmt.executeQuery().next()) {
         	String retorno = stmt.getResultSet().getString(1);
 			stmt.close();
 			conn.close();
@@ -191,8 +190,7 @@ public class DatabaseDAO {
         	
         	stmt.setString(1, filtroValor);
         	
-        	if (stmt.execute()) {
-            	stmt.getResultSet().next();
+        	if (stmt.executeQuery().next()) {
             	String retorno = stmt.getResultSet().getString(1);
     			stmt.close();
     			conn.close();

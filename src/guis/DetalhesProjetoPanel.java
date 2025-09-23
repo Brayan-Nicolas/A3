@@ -1,12 +1,24 @@
 package guis;
 
-import usuario.Usuario;
-import main.Projeto.Projeto;
-import usuario.Nivel;
-import main.Equipe;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
+import main.Equipe;
+import main.Projeto.Projeto;
+import usuário.Nivel;
+import usuário.Usuario;
 
 public class DetalhesProjetoPanel extends JPanel {
 
@@ -21,7 +33,7 @@ public class DetalhesProjetoPanel extends JPanel {
     public DetalhesProjetoPanel(Projeto projeto, Usuario usuarioLogado) {
         this.projeto = projeto;
         this.usuarioLogado = usuarioLogado;
-
+        
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -67,8 +79,9 @@ public class DetalhesProjetoPanel extends JPanel {
             }
         }
 
-        boolean podeGerenciar = (usuarioLogado.getNivel() == Nivel.ADMIN) ||
-                (usuarioLogado.getNivel() == Nivel.GESTOR && usuarioNaEquipeDoProjeto);
+        boolean podeGerenciar = (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) ||
+                (usuarioLogado.getNivel() == Nivel.GERENTE && usuarioNaEquipeDoProjeto) || 
+                (usuarioLogado.getNivel() == Nivel.GERENTE && usuarioLogado.getId() == projeto.getGerente().getId());
 
         if (podeGerenciar) {
             JPanel painelBotoesEquipes = new JPanel();
@@ -122,7 +135,6 @@ public class DetalhesProjetoPanel extends JPanel {
                 }
             });
         }
-    }
 
     add(painelEquipes, BorderLayout.WEST);
 

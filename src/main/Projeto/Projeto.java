@@ -25,10 +25,12 @@ public class Projeto {
         this.dataDeInicio = dataDeInicio;
         this.dataDeTerminoPrevisto = dataDeTerminoPrevisto;
         this.gerente = gerente;
-        this.equipes = equipes; // CORRIGIDO: Ponto e vírgula
+        this.equipes = equipes;
         this.status = StatusProjeto.PLANEJAMENTO;
     }
-
+    
+   
+    
     public String getNome() {
         return nome;
     }

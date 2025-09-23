@@ -22,6 +22,7 @@ public class Equipe {
     public Equipe(long id, String nome) {
     	this.id = id;
     	this.nome = nome;
+    	this.membros = new ArrayList<>();
     }
 
     // Métodos de Gerenciamento de Membros
