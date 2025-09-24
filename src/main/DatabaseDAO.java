@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import main.Projeto.Projeto;
 import usuário.Nivel;
 import usuário.Usuario;
+import main.Equipe;
 
 //Classe DAO responsável pela conexão e inserção no banco
 public class DatabaseDAO {
@@ -790,4 +791,32 @@ public class DatabaseDAO {
 			}
 		}
 	}
+
+
+    /**
+     * Busca uma equipe no banco de dados pelo seu ID.
+     * @param id O ID da equipe.
+     * @return O objeto Equipe, ou null se não for encontrado.
+     */
+    public static Equipe getEquipePorId(long id) {
+        String sql = "SELECT * FROM equipes WHERE id = ?";
+        try (Connection conn = conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    long equipeId = rs.getLong("id");
+                    String nome = rs.getString("nome");
+                    String descricao = rs.getString("descricao");
+                    
+                    return new Equipe(equipeId, nome, descricao);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

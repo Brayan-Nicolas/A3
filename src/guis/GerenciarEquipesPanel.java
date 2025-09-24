@@ -21,7 +21,6 @@ import main.DatabaseDAO;
 import main.Equipe;
 import usuario.Nivel;
 import usuario.Usuario;
-import guis.PainelPrincipal;
 
 public class GerenciarEquipePanel extends JPanel {
 

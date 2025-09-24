@@ -106,8 +106,20 @@ public class EquipesPanel extends JPanel {
 
     private void gerenciarEquipe(int row) {
         long equipeId = (long) modeloTabela.getValueAt(row, 0);
-        String nomeEquipe = (String) modeloTabela.getValueAt(row, 1);
-        JOptionPane.showMessageDialog(this,
-                "Você clicou no botão para gerenciar a equipe: " + nomeEquipe + " (ID: " + equipeId + ")");
+        
+        // Obter o objeto Equipe completo do banco de dados
+        Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
+        
+        if (equipeSelecionada != null) {
+            // Cria a nova tela de gerenciamento, passando a referência da tela atual para o botão "Voltar"
+            GerenciarEquipePanel gerenciarPanel = new GerenciarEquipePanel(equipeSelecionada, usuarioLogado, this);
+            
+            // Troca o painel na janela principal
+            parentFrame.setContentPane(gerenciarPanel);
+            parentFrame.revalidate();
+            parentFrame.repaint();
+        } else {
+            JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
