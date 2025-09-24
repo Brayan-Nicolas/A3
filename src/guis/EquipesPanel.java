@@ -1,20 +1,28 @@
 package guis;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.util.ArrayList; // Para simular o serviço
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JButton;
+import javax.swing.JDialog; // Importação necessária
+import javax.swing.JFrame; // Importação necessária
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities; // Importação necessária
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.AbstractCellEditor;
+import javax.swing.table.TableCellEditor;
 
 import main.DatabaseDAO;
 import main.Equipe;
-import main.ProgramaGestão;
+import main.ProgramaGestao;
 import usuário.Nivel;
 import usuário.Usuario;
 
@@ -26,67 +34,65 @@ public class EquipesPanel extends JPanel {
 
     public EquipesPanel(Usuario usuarioLogado) {
         this.usuarioLogado = usuarioLogado;
-
         setLayout(new BorderLayout(10, 10));
 
         // --- 1. Tabela de Equipes ---
-        // A coluna agora se chama "Membros"
-        String[] colunas = { "ID", "Nome da Equipe", "Membros" }; 
+        String[] colunas = { "ID", "Nome da Equipe", "Membros", "Ações" };
         modeloTabela = new DefaultTableModel(colunas, 0);
         tabelaEquipes = new JTable(modeloTabela);
         tabelaEquipes.setDefaultEditor(Object.class, null);
         JScrollPane scrollPane = new JScrollPane(tabelaEquipes);
-        
+
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- 2. Lógica de Permissões para os Botões ---
+        // --- 2. Painel de Botões de Criação ---
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
         if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR || usuarioLogado.getNivel() == Nivel.GERENTE) {
             JButton btnNovaEquipe = new JButton("Nova Equipe");
-            JButton btnGerenciarMembros = new JButton("Gerenciar Membros");
-
             painelBotoes.add(btnNovaEquipe);
-            painelBotoes.add(btnGerenciarMembros);
 
-            btnNovaEquipe.addActionListener(
-                    e -> JOptionPane.showMessageDialog(this, "Abrir formulário para criar nova equipe."));
-            btnGerenciarMembros.addActionListener(
-                    e -> JOptionPane.showMessageDialog(this, "Abrir formulário para gerenciar membros."));
+            // Ação do botão "Nova Equipe"
+            btnNovaEquipe.addActionListener(e -> {
+                // Obtém a janela pai para que o JDialog seja exibido corretamente
+                JDialog dialog = new RegistroEquipe((JFrame) SwingUtilities.getWindowAncestor(this));
+                dialog.setVisible(true);
+
+                // Recarrega a lista de equipes para mostrar a nova equipe
+                carregarEquipes();
+            });
         }
-
         add(painelBotoes, BorderLayout.SOUTH);
 
         // --- 3. Carregar os Dados ---
         carregarEquipes();
+
+        // --- 4. Configurar o Botão na Tabela ---
+        if (modeloTabela.getRowCount() > 0) {
+            tabelaEquipes.getColumn("Ações").setCellRenderer(new ButtonRenderer());
+            tabelaEquipes.getColumn("Ações").setCellEditor(new ButtonEditor(this::gerenciarEquipe));
+        }
     }
 
     private void carregarEquipes() {
         modeloTabela.setRowCount(0);
-
         List<Equipe> equipesDisponiveis = new ArrayList<>();
 
-        // Lógica de filtro movida do serviço
         if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
             equipesDisponiveis = DatabaseDAO.getEquipes();
         } else {
-            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestão.usuarioAtual.getId());
+            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestao.usuarioAtual.getId());
         }
 
         for (Equipe equipe : equipesDisponiveis) {
             modeloTabela.addRow(new Object[] {
-                equipe.getId(),
-                equipe.getNome(),
-                formatarMembros(equipe.getMembros()) // Usando o novo método
+                    equipe.getId(),
+                    equipe.getNome(),
+                    formatarMembros(equipe.getMembros()),
+                    new JButton("Gerenciar")
             });
         }
     }
 
-    /**
-     * Converte uma lista de usuários em uma string de nomes separados por vírgula.
-     * @param membros A lista de usuários.
-     * @return Uma string com os nomes dos membros.
-     */
     private String formatarMembros(List<Usuario> membros) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < membros.size(); i++) {
@@ -96,5 +102,12 @@ public class EquipesPanel extends JPanel {
             }
         }
         return sb.toString();
+    }
+
+    private void gerenciarEquipe(int row) {
+        long equipeId = (long) modeloTabela.getValueAt(row, 0);
+        String nomeEquipe = (String) modeloTabela.getValueAt(row, 1);
+        JOptionPane.showMessageDialog(this,
+                "Você clicou no botão para gerenciar a equipe: " + nomeEquipe + " (ID: " + equipeId + ")");
     }
 }
