@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import main.DatabaseDAO;
 import main.Equipe;
 import main.ProgramaGestão;
 import usuário.Nivel;
@@ -65,31 +66,11 @@ public class EquipesPanel extends JPanel {
 
         List<Equipe> equipesDisponiveis = new ArrayList<>();
 
-        // Dados fictícios, que na vida real viriam do banco de dados
-        Usuario admin = new Usuario(1L, "Admin Geral", "123", "admin@a.com", "Administrador", Nivel.ADMINISTRADOR);
-        Usuario gerente = new Usuario(2L, "Gerente Equipe A", "456", "gerente@a.com", "Gerente", Nivel.GERENTE);
-        Usuario colaborador = new Usuario(3L, "Colaborador B", "789", "colab@b.com", "Colaborador", Nivel.COLABORADOR);
-
-        Equipe equipeA = new Equipe(10L, "Equipe A");
-        equipeA.adicionarMembro(admin);
-        equipeA.adicionarMembro(gerente);
-        equipeA.adicionarMembro(ProgramaGestão.usuarioAtual);
-
-        Equipe equipeB = new Equipe(11L, "Equipe B");
-        equipeB.adicionarMembro(admin);
-        equipeB.adicionarMembro(colaborador);
-
         // Lógica de filtro movida do serviço
         if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
-            equipesDisponiveis.add(equipeA);
-            equipesDisponiveis.add(equipeB);
+            equipesDisponiveis = DatabaseDAO.getEquipes();
         } else {
-            if (equipeA.getMembros().contains(usuarioLogado)) {
-                equipesDisponiveis.add(equipeA);
-            }
-            if (equipeB.getMembros().contains(usuarioLogado)) {
-                equipesDisponiveis.add(equipeB);
-            }
+            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestão.usuarioAtual.getId());
         }
 
         for (Equipe equipe : equipesDisponiveis) {

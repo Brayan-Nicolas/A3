@@ -4,28 +4,31 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.DatabaseDAO;
 import main.Equipe;
 import usuário.Usuario;
 
 public class Projeto {
 
+	private long id;
     private String nome;
     private String descricao;
     private LocalDate dataDeInicio;
     private LocalDate dataDeTerminoPrevisto;
     private StatusProjeto status;
-    private Usuario gerente;
+    private long gerenteId;
     private List<Equipe> equipes;
 
     // Construtor para inicializar um novo projeto
-    public Projeto(String nome, String descricao, LocalDate dataDeInicio,
-            LocalDate dataDeTerminoPrevisto, Usuario gerente, List<Equipe> equipes) {
+    public Projeto(long id, String nome, String descricao, LocalDate dataDeInicio,
+            LocalDate dataDeTerminoPrevisto, long gerenteId) {
+    	this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.dataDeInicio = dataDeInicio;
         this.dataDeTerminoPrevisto = dataDeTerminoPrevisto;
-        this.gerente = gerente;
-        this.equipes = equipes;
+        this.gerenteId = gerenteId;
+        this.equipes = DatabaseDAO.getEquipesProjeto(this.id);
         this.status = StatusProjeto.PLANEJAMENTO;
     }
     
@@ -68,7 +71,7 @@ public class Projeto {
     }
 
     public Usuario getGerente() {
-        return gerente;
+        return DatabaseDAO.getUsuario(this.gerenteId);
     }
 
     public List<Equipe> getEquipes() {

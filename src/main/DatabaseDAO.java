@@ -7,6 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -148,10 +151,10 @@ public class DatabaseDAO {
 	/**
     * Método para retornar valores de um usuário específico do banco de dados
     * 
-    * @param userId		Id único do usuário a ser retornado
+    * @param idUsuario		Id único do usuário a ser retornado
     * @param campo 		Coluna a ser retornada
     */
-    public static String getValorUsuario(int userId, String campo) {
+    public static String getValorUsuario(int idUsuario, String campo) {
     	Connection conn = conectar();
         if (conn == null) { return null; }
         
@@ -159,7 +162,7 @@ public class DatabaseDAO {
         try {
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, campo);
-        stmt.setInt(2, userId);
+        stmt.setInt(2, idUsuario);
         
         if (stmt.executeQuery().next()) {
         	String retorno = stmt.getResultSet().getString(1);
@@ -209,7 +212,7 @@ public class DatabaseDAO {
      * 
      * @param id 	Id do usuário a ser recuperado
      */
-    public static boolean recuperarUsuário(int id) {
+    public static boolean recuperarUsuarioLogado(long idUsuario) {
     	Connection conn = conectar();
         if (conn == null) { return false; }
         
@@ -217,7 +220,7 @@ public class DatabaseDAO {
         
         try {
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, id);
+			stmt.setInt(1, (int) idUsuario);
 			stmt.executeQuery();
 			if (!stmt.getResultSet().next()) return false;
 			ResultSet set = stmt.getResultSet();
@@ -231,6 +234,7 @@ public class DatabaseDAO {
 			Nivel nivel = Nivel.valueOf(set.getString("nivel"));
 			
 			ProgramaGestão.usuarioAtual = new Usuario(nome, cpf, email, cargo, login, senha, nivel);
+			ProgramaGestão.usuarioAtual.setId(set.getInt("id"));
 			
 			stmt.close();
 			conn.close();
@@ -242,4 +246,283 @@ public class DatabaseDAO {
 		}
         
     }
+
+    public static List<Equipe> getEquipes() {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT * FROM equipes";
+        
+        try {
+	        PreparedStatement stmt = conn.prepareStatement(sql);
+	        
+	        ResultSet retorno = stmt.executeQuery();
+	        List<Equipe> equipes = new ArrayList<Equipe>();
+	        while (retorno.next()) {
+	        	long idEquipe = retorno.getInt("id");
+	        	String nome = retorno.getString("nome");
+	        	String descricao = retorno.getString("descricao");
+	        	
+	        	equipes.add(new Equipe(idEquipe, nome, descricao));
+	        	
+	        }
+	        
+	        stmt.close();
+	        conn.close();
+	        if (!equipes.isEmpty()) return equipes;
+	        
+	        return null;
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+    }
+    
+    public static List<Equipe> getEquipesUsuario(long idUsuario) {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT equipes.* FROM equipes "
+        		+ "INNER JOIN usuarios_equipes AS u_e "
+        		+ "ON u_e.id_equipe = equipes.id WHERE u_e.id_usuario = ?";
+        
+        try {
+	        PreparedStatement stmt = conn.prepareStatement(sql);
+	        stmt.setInt(1, (int) idUsuario);
+	        
+	        ResultSet retorno = stmt.executeQuery();
+	        List<Equipe> equipes = new ArrayList<Equipe>();
+	        while (retorno.next()) {
+	        	long idEquipe = retorno.getInt("id");
+	        	String nome = retorno.getString("nome");
+	        	String descricao = retorno.getString("descricao");
+	        	
+	        	equipes.add(new Equipe(idEquipe, nome, descricao));
+	        	
+	        }
+	        
+	        stmt.close();
+	        conn.close();
+	        if (!equipes.isEmpty()) return equipes;
+	        return null;
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+    }
+
+    public static List<Usuario> getUsuariosEquipe(long idEquipe) {
+		Connection conn = conectar();
+        if (conn == null) { return null; }
+		
+        String sql = "SELECT usuarios.* FROM usuarios "
+        		+ "INNER JOIN usuarios_equipes AS u_e "
+        		+ "ON u_e.id_usuario = usuarios.id WHERE id_equipe = ?";
+        
+        try {
+	        PreparedStatement stmt = conn.prepareStatement(sql);
+	        stmt.setInt(1, (int) idEquipe);
+	        
+	        ResultSet retorno = stmt.executeQuery();
+	        List<Usuario> usuarios = new ArrayList<Usuario>();
+	        while (retorno.next()) {
+	        	long idUsuario = retorno.getInt("id");
+	        	String nome = retorno.getString("nome");
+	        	String cpf = retorno.getString("cpf");
+	        	String email = retorno.getString("email");
+	        	String cargo = retorno.getString("cargo");
+	        	Nivel nivel = Nivel.valueOf(retorno.getString("nivel"));
+	        	
+	        	usuarios.add(new Usuario(idUsuario, nome, cpf, email, cargo, nivel));
+	        	
+	        }
+	        
+	        stmt.close();
+	        conn.close();
+	        if (!usuarios.isEmpty()) return usuarios;
+	        return null;
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+	}
+	
+    public static List<Projeto> getProjetos() {
+		Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT * FROM projetos";
+        
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	
+        	ResultSet retorno = stmt.executeQuery();
+        	
+        	List<Projeto> projetos = new ArrayList<Projeto>();
+        	
+        	while (retorno.next()) {
+        		long idProjeto = retorno.getInt("id");
+        		String nome = retorno.getString("nome");
+        		String descricao = retorno.getString("descricao");
+        		LocalDate dataInicio = retorno.getDate("data_inicio").toLocalDate();
+        		LocalDate dataTerminoPrevisto = retorno.getDate("data_termino_previsto").toLocalDate();
+        		long gerenteId = retorno.getInt("gerente_id");
+        		
+        		projetos.add(new Projeto(idProjeto, nome, descricao, dataInicio, dataTerminoPrevisto, gerenteId));
+        	}
+        	
+        	stmt.close();
+        	conn.close();
+        	if (!projetos.isEmpty()) return projetos;
+        	return null;
+        	
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+        
+	}
+    
+    public static List<Equipe> getEquipesProjeto(long idProjeto) {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT equipes.* FROM equipes "
+        		+ "INNER JOIN equipes_projetos AS e_p ON e_p.id_equipe = equipes.id "
+        		+ "WHERE e_p.id_projeto = ?";
+        
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	stmt.setInt(1, (int) idProjeto);
+        	
+        	ResultSet retorno = stmt.executeQuery();
+        	
+        	List<Equipe> equipes = new ArrayList<Equipe>();
+        	
+        	while (retorno.next()) {
+        		long equipeId = retorno.getInt("id");
+        		String nome = retorno.getString("nome");
+        		String descricao = retorno.getString("descricao");
+        		
+        		equipes.add(new Equipe(equipeId, nome, descricao));
+        	}
+        	
+        	stmt.close();
+        	conn.close();
+        	if (!equipes.isEmpty()) return equipes;
+        	return null;
+        	
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+        
+    }
+    
+    public static List<Projeto> getProjetosEquipe(long idEquipe) {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT projetos.* FROM projetos "
+        		+ "INNER JOIN equipes_projetos AS e_p ON e_p.id_projeto = projetos.id "
+        		+ "WHERE e_p.id_equipe = ?";
+        
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	stmt.setInt(1, (int) idEquipe);
+        	
+        	ResultSet retorno = stmt.executeQuery();
+        	
+        	List<Projeto> projetos = new ArrayList<Projeto>();
+        	
+        	while (retorno.next()) {
+        		long idProjeto = retorno.getInt("id");
+        		String nome = retorno.getString("nome");
+        		String descricao = retorno.getString("descricao");
+        		LocalDate dataInicio = retorno.getDate("data_inicio").toLocalDate();
+        		LocalDate dataTerminoPrevisto = retorno.getDate("data_termino_previsto").toLocalDate();
+        		long gerenteId = retorno.getInt("gerente_id");
+        		
+        		projetos.add(new Projeto(idProjeto, nome, descricao, dataInicio, dataTerminoPrevisto, gerenteId));
+        	}
+        	
+        	stmt.close();
+        	conn.close();
+        	if (!projetos.isEmpty()) return projetos;
+        	return null;
+        	
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+    }
+    
+    public static Usuario getUsuario(long id) {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT * FROM usuarios WHERE id = ?";
+        
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	stmt.setInt(1, (int) id);
+        	
+        	ResultSet retorno = stmt.executeQuery();
+        	if (retorno.next()) {
+        		long idUsuario = retorno.getInt("id");
+	        	String nome = retorno.getString("nome");
+	        	String cpf = retorno.getString("cpf");
+	        	String email = retorno.getString("email");
+	        	String cargo = retorno.getString("cargo");
+	        	Nivel nivel = Nivel.valueOf(retorno.getString("nivel"));
+        		
+        		return new Usuario(idUsuario, nome, cpf, email, cargo, nivel);
+        	}
+        	return null;
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+        
+    }
+    
+/* public static Equipe getEquipeDB(long id) {
+    	Connection conn = conectar();
+        if (conn == null) { return null; }
+        
+        String sql = "SELECT * FROM equipes WHERE id = ?";
+        try {
+        	PreparedStatement stmt = conn.prepareStatement(sql);
+        	stmt.setInt(1, (int) id);
+        	
+        	ResultSet retorno = stmt.executeQuery();
+        	if (retorno.next()) {
+        		
+        		return retorno;        		
+        	}
+        	
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+        
+    	return null;
+    }
+    */
+    
+	public static List<Projeto> getProjetosUsuario(long idUsuario) {
+		Connection conn = conectar();
+        if (conn == null) { return null; }
+		
+        List<Equipe> equipes = DatabaseDAO.getEquipesUsuario(idUsuario);
+        List<Projeto> projetos = new ArrayList<Projeto>();
+        
+        for (Equipe e : equipes) {
+        	List<Projeto> adicionar = DatabaseDAO.getProjetosEquipe(e.getId());
+        	if (adicionar != null) projetos.addAll(adicionar);
+        }
+        
+        if (!projetos.isEmpty()) return projetos;
+        return null;
+	}
 }

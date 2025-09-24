@@ -16,13 +16,13 @@ public class Equipe {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
-        this.membros = new ArrayList<>();
+        this.membros = DatabaseDAO.getUsuariosEquipe(this.id);
     }
     
     public Equipe(long id, String nome) {
     	this.id = id;
     	this.nome = nome;
-    	this.membros = new ArrayList<>();
+    	this.membros = DatabaseDAO.getUsuariosEquipe(this.id);
     }
 
     // Métodos de Gerenciamento de Membros

@@ -68,7 +68,7 @@ public class InterfaceLogin extends JFrame {
 		
 		entrar.addActionListener(e -> {
 			if (verificarSenha(txtUsuario.getText(), new String(txtSenha.getPassword()))) {
-				DatabaseDAO.recuperarUsuário(Integer.parseInt(DatabaseDAO.getValor("id", "login", txtUsuario.getText())));
+				DatabaseDAO.recuperarUsuarioLogado(Integer.parseInt(DatabaseDAO.getValor("id", "login", txtUsuario.getText())));
 				JOptionPane.showMessageDialog(ProgramaGestão.currentWindow, "Login feito com sucesso!", "Sucesso!", JOptionPane.INFORMATION_MESSAGE);
 				ProgramaGestão.currentWindow = new PainelPrincipal();
 				this.dispose();

@@ -5,7 +5,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,11 +17,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import main.Equipe;
+import main.DatabaseDAO;
 import main.ProgramaGestão;
 import main.Projeto.Projeto;
 import usuário.Nivel;
-import usuário.Usuario;
 
 public class PainelPrincipal extends JFrame {
 	JPanel painelDetalhes;
@@ -52,43 +51,60 @@ public class PainelPrincipal extends JFrame {
 		JTabbedPane painelAbas = new JTabbedPane();
 		
 		// Painel de equipes
-		JPanel equipes = new EquipesPanel(ProgramaGestão.usuarioAtual);
+		JPanel equipesPainel = new EquipesPanel(ProgramaGestão.usuarioAtual);
 		
 		// Painel de projetos
-		JPanel projetos = new JPanel(new BorderLayout());
+		JPanel projetosPainel = new JPanel(new BorderLayout());
 
 		// Menu de seleção de projetos
-		Projeto[] projetosLista = getProjetos();
-		JComboBox<String> projetosCombo = new JComboBox<String>(Arrays.stream(projetosLista).map(Projeto::getNome).toArray(String[]::new));
-		projetos.add(projetosCombo, BorderLayout.NORTH);
+		List<Projeto> projetosLista = new ArrayList<Projeto>();
+		// Se o usuário é Administrador, ele pode ver todos os projetos
+		if (ProgramaGestão.usuarioAtual.getNivel() == Nivel.ADMINISTRADOR) { 
+			// Retorna os projetos e verifica se existe pelo menos um
+			List<Projeto> projetosDB = DatabaseDAO.getProjetos();
+			if (!(projetosDB == null)) projetosLista = projetosDB;
+		} else {
+			// Retorna os projetos e verifica se existe pelo menos um
+			List<Projeto> projetosDB = DatabaseDAO.getProjetosUsuario(ProgramaGestão.usuarioAtual.getId());
+			if (!(projetosDB == null)) projetosLista = projetosDB;
+		}
+		// Cria a seleção, com N/A caso não tenha nenhum projeto
+		JComboBox<String> projetosCombo;
+		if (projetosLista == null) {
+			projetosCombo = new JComboBox<String>();
+		} else {
+			projetosCombo = new JComboBox<String>(projetosLista.stream().map(Projeto::getNome).toArray(String[]::new));
+		}
+		projetosPainel.add(projetosCombo, BorderLayout.NORTH);
 		
 		painelDetalhes = new JPanel();
 		// Define o Projeto padrão como o primeiro da lista
 		if (projetosCombo.getSelectedIndex() >= 0) {
-			painelDetalhes = new DetalhesProjetoPanel(projetosLista[projetosCombo.getSelectedIndex()], ProgramaGestão.usuarioAtual);
-			projetos.add(painelDetalhes, BorderLayout.CENTER);
+			painelDetalhes = new DetalhesProjetoPanel(projetosLista.get(projetosCombo.getSelectedIndex()), ProgramaGestão.usuarioAtual);
+			projetosPainel.add(painelDetalhes, BorderLayout.CENTER);
 		}
 		
-		// Lógica para atualizar o painel a partir da seleção no menu
+		// Lógica para atualizar o painel a partir da seleção no menu		
+		List<Projeto> projetosListaFinal = projetosLista;
 		projetosCombo.addItemListener( new ItemListener(){
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.DESELECTED) {
-					projetos.remove(painelDetalhes);
+					projetosPainel.remove(painelDetalhes);
 					painelDetalhes = null;
 				}
 				
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					painelDetalhes = new DetalhesProjetoPanel(projetosLista[projetosCombo.getSelectedIndex()], ProgramaGestão.usuarioAtual);
-					projetos.add(painelDetalhes, BorderLayout.CENTER);
+					painelDetalhes = new DetalhesProjetoPanel(projetosListaFinal.get(projetosCombo.getSelectedIndex()), ProgramaGestão.usuarioAtual);
+					projetosPainel.add(painelDetalhes, BorderLayout.CENTER);
 				}
-				projetos.revalidate();
+				projetosPainel.revalidate();
 			}
 		});
 		
 		
-		painelAbas.addTab("Equipes", equipes);
-		painelAbas.addTab("Projetos", projetos);
+		painelAbas.addTab("Equipes", equipesPainel);
+		painelAbas.addTab("Projetos", projetosPainel);
 		add(botões, BorderLayout.NORTH);
 		add(painelAbas, BorderLayout.CENTER);
 		
@@ -97,15 +113,6 @@ public class PainelPrincipal extends JFrame {
         setSize(500, 400);
         setLocationRelativeTo(null); // Centralizar
         setVisible(true);
-	}
-	// Método temporário, deve ser substituído por uma integração com o banco de dados
-	private Projeto[] getProjetos() {
-		Usuario gerente = new Usuario(35, "aaa", "123", "email@email.com", "Gerente", Nivel.GERENTE);
-		List<Equipe> equipes = Arrays.asList(new Equipe(35, "equipe boa"), new Equipe(36, "equipe ruim"));
-		Projeto projeto1 = new Projeto("A1", "Fazer a A1", LocalDate.now(), LocalDate.now(), gerente, equipes);
-		Projeto projeto2 = new Projeto("A2", "Fazer a A2", LocalDate.now(), LocalDate.now(), gerente, equipes);
-		Projeto projeto3 = new Projeto("A3", "Fazer a A3", LocalDate.now(), LocalDate.now(), gerente, equipes);
-		return new Projeto[] {projeto1, projeto2, projeto3};
 	}
 
 }
