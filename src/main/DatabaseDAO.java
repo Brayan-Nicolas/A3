@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
@@ -144,7 +145,7 @@ public class DatabaseDAO {
 			if (rs.next()) {
 				long novoId = rs.getLong(1);
 				// Atualizamos o objeto Java com o ID gerado
-				// projeto.setId(novoId);
+				projeto.setId(novoId);
 				System.out.println("Projeto inserido com ID: " + novoId);
 			}
 
@@ -452,9 +453,7 @@ public class DatabaseDAO {
 
 			stmt.close();
 			conn.close();
-			if (!projetos.isEmpty())
-				return projetos;
-			return null;
+			return projetos;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -614,9 +613,7 @@ public class DatabaseDAO {
 				projetos.addAll(adicionar);
 		}
 
-		if (!projetos.isEmpty())
-			return projetos;
-		return null;
+		return projetos.stream().distinct().collect(Collectors.toList());
 	}
 
 	/**
@@ -812,6 +809,9 @@ public class DatabaseDAO {
                     String nome = rs.getString("nome");
                     String descricao = rs.getString("descricao");
                     
+                    
+            		stmt.close();
+            		conn.close();
                     return new Equipe(equipeId, nome, descricao);
                 }
             }
@@ -820,4 +820,76 @@ public class DatabaseDAO {
         }
         return null;
     }
+
+    public static boolean adicionarEquipeProjeto(long projetoId, long equipeId) {
+    	Connection conn = conectar();
+    	if (conn == null) return false;
+    	
+    	String sql = "INSERT INTO equipes_projetos VALUES (?, ?)";
+    	
+    	try {
+    		PreparedStatement stmt = conn.prepareStatement(sql);
+    		stmt.setInt(1, (int) equipeId);
+    		stmt.setInt(2, (int) projetoId);
+    		
+    		stmt.executeUpdate();
+    		stmt.close();
+    		conn.close();
+    		return true;
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    		return false;
+    	}
+    }
+
+	public static boolean removerEquipeProjeto(long projetoId, long equipeId) {
+		Connection conn = conectar();
+    	if (conn == null) return false;
+    	
+    	String sql = "DELETE FROM equipes_projetos WHERE id_equipe = ? AND id_projeto = ?";
+    	
+    	try {
+    		PreparedStatement stmt = conn.prepareStatement(sql);
+    		stmt.setInt(1, (int) equipeId);
+    		stmt.setInt(2, (int) projetoId);
+    		
+    		stmt.executeUpdate();
+    		stmt.close();
+    		conn.close();
+    		return true;
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    		return false;
+    	}
+		
+	}
+
+	public static boolean excluirProjeto(long projetoId) {
+		Connection conn = conectar();
+		if (conn == null) return false;
+		
+		String sql = "DELETE FROM equipes_projetos WHERE id_projeto = ?";
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, (int) projetoId);
+			
+			stmt.executeUpdate();
+			
+			sql = "DELETE FROM projetos WHERE id = ?";
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, (int) projetoId);
+			
+			stmt.executeUpdate();
+			
+    		stmt.close();
+    		conn.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+	}
+
 }
