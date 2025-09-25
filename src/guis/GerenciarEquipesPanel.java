@@ -39,10 +39,8 @@ public class GerenciarEquipesPanel extends JPanel {
     private JButton btnSalvar, btnAdicionarMembro, btnRemoverMembro;
     private JButton btnVoltar;
 
-    // Construtor agora recebe o usuário logado e a referência ao painel principal
     public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, JFrame parentFrame) {
         this.equipe = equipe;
-        // CORREÇÃO: Usar o usuário passado no construtor em vez da variável global
         this.usuarioLogado = usuarioLogado;
         this.parentFrame = parentFrame;
         setLayout(new BorderLayout(10, 10));
@@ -74,7 +72,7 @@ public class GerenciarEquipesPanel extends JPanel {
         adicionarBotoesDeMembro(painelMembros);
         add(painelMembros, BorderLayout.CENTER);
 
-        // --- 3. Botões de ação, incluindo o novo botão Voltar ---
+        // --- 3. Botões de ação ---
         JPanel painelBotoesAcao = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnSalvar = new JButton("Salvar Alterações");
         btnVoltar = new JButton("Voltar");
@@ -115,7 +113,7 @@ public class GerenciarEquipesPanel extends JPanel {
         btnAdicionarMembro.addActionListener(e -> adicionarMembro());
         btnRemoverMembro.addActionListener(e -> removerMembro());
 
-        // CORREÇÃO: Lógica para o botão Voltar
+        // Lógica para o botão Voltar
         btnVoltar.addActionListener(e -> {
             // Cria uma nova instância do EquipesPanel, passando o usuário logado
             EquipesPanel equipesPanel = new EquipesPanel(usuarioLogado);
@@ -138,14 +136,6 @@ public class GerenciarEquipesPanel extends JPanel {
         btnAdicionarMembro.setEnabled(podeModificar);
         btnRemoverMembro.setEnabled(podeModificar);
     }
-
-    // CORREÇÃO: Este método é redundante e deve ser removido, pois a lógica
-    // foi movida para o ActionListener do botão Voltar.
-    /*
-     * private void voltarAoEquipesPanel() {
-     * // ...
-     * }
-     */
 
     // --- Ações dos Botões ---
     private void salvarAlteracoes() {
