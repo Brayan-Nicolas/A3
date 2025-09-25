@@ -63,17 +63,18 @@ public class DatabaseDAO {
 			String sql = "INSERT INTO usuarios (nome, cpf, email, cargo, login, senha, nivel) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 			stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, Utilidades.primeiraMaiuscula(usuario.getNome()));
+			stmt.setString(1, usuario.getNome());
 			stmt.setString(2, usuario.getCpf());
 			stmt.setString(3, usuario.getEmail());
-			stmt.setString(4, Utilidades.primeiraMaiuscula(usuario.getCargo()));
+			stmt.setString(4, usuario.getCargo());
 			stmt.setString(5, usuario.getLogin());
 			stmt.setString(6, usuario.getSenha());
 			stmt.setString(7, usuario.getNivel().toString());
 
 			stmt.executeUpdate();
-			stmt.getGeneratedKeys().first();
-			usuario.setId(stmt.getGeneratedKeys().getInt(1));
+			ResultSet result = stmt.getGeneratedKeys();
+			result.next();
+			usuario.setId(result.getInt(1));
 			stmt.close();
 			conn.close();
 			return true;
@@ -377,9 +378,7 @@ public class DatabaseDAO {
 
 			stmt.close();
 			conn.close();
-			if (!equipes.isEmpty())
-				return equipes;
-			return null;
+			return equipes;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;

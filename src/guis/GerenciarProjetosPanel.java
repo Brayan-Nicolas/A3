@@ -97,7 +97,7 @@ public class GerenciarProjetosPanel {
 					JOptionPane.showMessageDialog(this, "Favor preencher todos os campos!");
 				} else {
 					try {
-						valorDataInicio = LocalDate.parse(dataInicio.getText(), DateTimeFormatter.ofPattern("dd mm aaaa"));
+						valorDataInicio = LocalDate.parse(dataInicio.getText());
 					} catch (DateTimeParseException e) {
 						JOptionPane.showMessageDialog(this, "Favor inserir uma data de início válida no formato DD MM AAAA!");
 					}

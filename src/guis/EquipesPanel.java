@@ -68,18 +68,20 @@ public class EquipesPanel extends JPanel {
         }
 
         int row = 0;
-        for (Equipe equipe : equipesDisponiveis) {
-            // Cria uma nova instância do botão para cada linha.
-            // A classe interna tem acesso direto ao método 'gerenciarEquipe'.
-            JButton gerenciarButton = new GerenciarEquipeButton(row);
-
-            modeloTabela.addRow(new Object[] {
-                    equipe.getId(),
-                    equipe.getNome(),
-                    formatarMembros(equipe.getMembros()),
-                    gerenciarButton
-            });
-            row++;
+        if (equipesDisponiveis != null) {
+	        for (Equipe equipe : equipesDisponiveis) {
+	            // Cria uma nova instância do botão para cada linha.
+	            // A classe interna tem acesso direto ao método 'gerenciarEquipe'.
+	            JButton gerenciarButton = new GerenciarEquipeButton(row);
+	
+	            modeloTabela.addRow(new Object[] {
+	                    equipe.getId(),
+	                    equipe.getNome(),
+	                    formatarMembros(equipe.getMembros()),
+	                    gerenciarButton
+	            });
+	            row++;
+	        }
         }
     }
 
