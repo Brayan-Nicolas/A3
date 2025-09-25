@@ -161,29 +161,24 @@ public class EquipesPanel extends JPanel {
         }
     }
 
-    /**
-     * Editor para lidar com o clique no botão da célula da tabela.
-     */
     private class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
         private final ButtonClickListener listener;
-        private int row; // Adicione uma variável para armazenar a linha
+        private int row;
+        private boolean isPushed;
 
         public ButtonEditor(ButtonClickListener listener) {
             super(new JTextField());
             this.listener = listener;
-            setClickCountToStart(1);
+            setClickCountToStart(1); // Ativa o editor com apenas um clique
 
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Usa a variável de instância `row` que foi salva
-                    fireEditingStopped();
-                    if (row != -1) {
-                        listener.onButtonClick(row);
-                    }
+                    isPushed = true; // Seta a flag para indicar que o botão foi clicado
+                    fireEditingStopped(); // Força a parada da edição
                 }
             });
         }
@@ -191,8 +186,8 @@ public class EquipesPanel extends JPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
-            // Salva a linha no editor ANTES da ação de clique
             this.row = row;
+            isPushed = false;
 
             if (value instanceof JButton) {
                 button = (JButton) value;
@@ -204,11 +199,17 @@ public class EquipesPanel extends JPanel {
 
         @Override
         public Object getCellEditorValue() {
+            if (isPushed) {
+                // Ação é executada APENAS depois que a edição é interrompida
+                listener.onButtonClick(row);
+            }
+            isPushed = false;
             return button;
         }
 
         @Override
         public boolean stopCellEditing() {
+            isPushed = false;
             return super.stopCellEditing();
         }
     }
