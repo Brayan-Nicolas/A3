@@ -100,21 +100,104 @@ public class EquipesPanel extends JPanel {
     }
 
     private void gerenciarEquipe(int row) {
-        long equipeId = (long) modeloTabela.getValueAt(row, 0);
+    long equipeId = (long) modeloTabela.getValueAt(row, 0);
+
+    // Obter o objeto Equipe completo do banco de dados
+    Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
+
+    if (equipeSelecionada != null) {
+        // Encontra o JFrame pai de forma segura
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         
-        // Obter o objeto Equipe completo do banco de dados
-        Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
-        
-        if (equipeSelecionada != null) {
+        if (parentFrame != null) {
             // Cria a nova tela de gerenciamento, passando a referência da tela atual para o botão "Voltar"
             GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado, this);
-            
+
             // Troca o painel na janela principal
             parentFrame.setContentPane(gerenciarPanel);
             parentFrame.revalidate();
             parentFrame.repaint();
         } else {
-            JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Janela principal não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
+    } else {
+        JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+    /**
+     * Renderizador para exibir o JButton na célula da tabela.
+     */
+    private class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            if (value instanceof JButton) {
+                return (JButton) value;
+            }
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    /**
+     * Editor para lidar com o clique no botão da célula da tabela.
+     */
+    private class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private final ButtonClickListener listener;
+
+        public ButtonEditor(ButtonClickListener listener) {
+            super(new JTextField());
+            this.listener = listener;
+            setClickCountToStart(1); // Ativa o editor com apenas um clique
+
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Obtém a linha atual e notifica o ouvinte
+                    int row = tabelaEquipes.convertRowIndexToModel(tabelaEquipes.getEditingRow());
+                    fireEditingStopped();
+                    if (row != -1) {
+                        listener.onButtonClick(row);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+                int column) {
+            if (value instanceof JButton) {
+                button = (JButton) value;
+            } else {
+                button.setText((value == null) ? "" : value.toString());
+            }
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return button;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            return super.stopCellEditing();
+        }
+    }
+
+    /**
+     * Interface funcional para o ouvinte do botão.
+     */
+    @FunctionalInterface
+    private interface ButtonClickListener {
+        void onButtonClick(int row);
     }
 }

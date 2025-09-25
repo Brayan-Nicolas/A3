@@ -28,7 +28,7 @@ public class GerenciarEquipesPanel extends JPanel {
 
     private Equipe equipe;
     private Usuario usuarioLogado;
-    private PainelPrincipal painelPrincipal; // Adicionando uma referência ao painel principal
+    private EquipesPanel equipesPanel; // Adicionando uma referência ao painel principal
 
     private JTextField txtNome;
     private JTextArea txtDescricao;
@@ -39,10 +39,10 @@ public class GerenciarEquipesPanel extends JPanel {
     private JButton btnVoltar; // O novo botão
 
     // Construtor agora recebe o usuário logado e a referência ao painel principal
-    public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, PainelPrincipal painelPrincipal) {
+    public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, EquipesPanel equipesPanel) {
         this.equipe = equipe;
         this.usuarioLogado = ProgramaGestão.usuarioAtual;
-        this.painelPrincipal = painelPrincipal; 
+        this.equipesPanel = equipesPanel; 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -112,7 +112,7 @@ public class GerenciarEquipesPanel extends JPanel {
         btnSalvar.addActionListener(e -> salvarAlteracoes());
         btnAdicionarMembro.addActionListener(e -> adicionarMembro());
         btnRemoverMembro.addActionListener(e -> removerMembro());
-        btnVoltar.addActionListener(e -> voltarAoPainelPrincipal()); // Adicionando a ação do botão Voltar
+        btnVoltar.addActionListener(e -> voltarAoEquipesPanel()); // Adicionando a ação do botão Voltar
     }
 
     private void aplicarRestricoesDeAcesso() {
@@ -128,11 +128,11 @@ public class GerenciarEquipesPanel extends JPanel {
     }
 
     // Método que implementa a navegação
-    private void voltarAoPainelPrincipal() {
+    private void voltarAoEquipesPanel() {
         // Pega o contêiner pai, que deve ser o seu JFrame ou um JPanel intermediário
-        this.getParent().add(painelPrincipal);
+        this.getParent().add(equipesPanel);
         this.setVisible(false); // Oculta o painel atual
-        painelPrincipal.setVisible(true); // Exibe o painel principal
+        equipesPanel.setVisible(true); // Exibe o painel principal
         this.getParent().remove(this); // Remove o painel atual para liberar memória
         this.getParent().revalidate();
         this.getParent().repaint();
