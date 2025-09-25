@@ -22,6 +22,7 @@ import main.DatabaseDAO;
 import main.Equipe;
 import usuário.Nivel;
 import usuário.Usuario;
+import main.ProgramaGestão;
 
 public class GerenciarEquipesPanel extends JPanel {
 
@@ -40,7 +41,7 @@ public class GerenciarEquipesPanel extends JPanel {
     // Construtor agora recebe o usuário logado e a referência ao painel principal
     public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, PainelPrincipal painelPrincipal) {
         this.equipe = equipe;
-        this.usuarioLogado = usuarioLogado;
+        this.usuarioLogado = ProgramaGestão.usuarioAtual;
         this.painelPrincipal = painelPrincipal; 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

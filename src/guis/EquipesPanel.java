@@ -28,7 +28,7 @@ public class EquipesPanel extends JPanel {
     private DefaultTableModel modeloTabela;
 
     public EquipesPanel(Usuario usuarioLogado) {
-        this.usuarioLogado = usuarioLogado;
+        this.usuarioLogado = ProgramaGestão.usuarioAtual;
         setLayout(new BorderLayout(10, 10));
 
         // --- 1. Tabela de Equipes ---
