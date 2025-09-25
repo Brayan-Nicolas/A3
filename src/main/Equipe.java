@@ -56,6 +56,7 @@ public class Equipe {
     }
 
     public List<Usuario> getMembros() {
+    	if (this.membros == null) return new ArrayList<Usuario>();
         return membros;
     }
 
