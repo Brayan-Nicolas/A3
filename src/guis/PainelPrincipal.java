@@ -3,6 +3,9 @@ package guis;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -10,6 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -24,7 +30,10 @@ import usuário.Nivel;
 
 public class PainelPrincipal extends JFrame {
 	JPanel painelDetalhes;
-
+	//Projeto ultimoProjeto;
+	ComboBoxModel<String> comboModel;
+	Projeto projetoSelecionado;
+	
 	public PainelPrincipal() {
 		// Define o Layout do frame do painel principal
 		setLayout(new BorderLayout());
@@ -58,38 +67,59 @@ public class PainelPrincipal extends JFrame {
 		JPanel projetosPainel = new JPanel(new BorderLayout());
 
 		// Menu de seleção de projetos
-		List<Projeto> projetosLista = new ArrayList<Projeto>();
-		// Se o usuário é Administrador, ele pode ver todos os projetos
-		if (ProgramaGestão.usuarioAtual.getNivel() == Nivel.ADMINISTRADOR) {
-			// Retorna os projetos e verifica se existe pelo menos um
-			List<Projeto> projetosDB = DatabaseDAO.getProjetos();
-			if (!(projetosDB == null))
-				projetosLista = projetosDB;
-		} else {
-			// Retorna os projetos e verifica se existe pelo menos um
-			List<Projeto> projetosDB = DatabaseDAO.getProjetosUsuario(ProgramaGestão.usuarioAtual.getId());
-			if (!(projetosDB == null))
-				projetosLista = projetosDB;
-		}
-		// Cria a seleção, com N/A caso não tenha nenhum projeto
 		JComboBox<String> projetosCombo;
-		if (projetosLista == null) {
-			projetosCombo = new JComboBox<String>();
-		} else {
-			projetosCombo = new JComboBox<String>(projetosLista.stream().map(Projeto::getNome).toArray(String[]::new));
-		}
+		List<Projeto> projetosLista = getProjetos();
+		
+		comboModel = new DefaultComboBoxModel<String>(projetosLista.stream().map(Projeto::getNome).toArray(String[]::new));
+		projetosCombo = new JComboBox<String>(comboModel);
+		
 		projetosPainel.add(projetosCombo, BorderLayout.NORTH);
 
 		painelDetalhes = new JPanel();
+		
+
+		// Botões para criar e excluir projetos
+		JPanel painelBotões = new JPanel(new GridBagLayout());
+        if (ProgramaGestão.usuarioAtual.getNivel() == Nivel.GERENTE || ProgramaGestão.usuarioAtual.getNivel() == Nivel.ADMINISTRADOR) {
+        	GridBagConstraints gbc = new GridBagConstraints();
+        	gbc.fill = GridBagConstraints.BOTH;
+        	gbc.weightx = 1;
+        	gbc.weighty = 1;
+        	gbc.insets = new Insets(2, 2, 2, 2);
+        	painelBotões.setBorder(BorderFactory.createTitledBorder("Editar Projetos"));
+        	
+        	JButton btnCriarProjeto = new JButton("Criar novo Projeto");
+        	JButton btnExcluirProjeto = new JButton("Excluir Projeto");
+	        gbc.gridx = 0;
+	        gbc.gridy = 0;
+	        painelBotões.add(btnCriarProjeto, gbc);
+	        gbc.gridy = 1;
+	        painelBotões.add(btnExcluirProjeto, gbc);
+
+	        btnCriarProjeto.addActionListener(e -> {
+	        	new GerenciarProjetosPanel.painelCriar(this);
+	        	comboModel = new DefaultComboBoxModel<String>(getProjetos().stream().map(Projeto::getNome).toArray(String[]::new));
+	        });
+	        
+	        btnExcluirProjeto.addActionListener(e -> {
+	        	if (GerenciarProjetosPanel.painelExcluir(this) == JOptionPane.YES_OPTION) {
+	        		comboModel = new DefaultComboBoxModel<String>(getProjetos().stream().map(Projeto::getNome).toArray(String[]::new));
+		        	projetosCombo.setSelectedIndex(0);
+	        	}
+	        });
+        }
+	        
+		
 		// Define o Projeto padrão como o primeiro da lista
 		if (projetosCombo.getSelectedIndex() >= 0) {
 			painelDetalhes = new DetalhesProjetoPanel(projetosLista.get(projetosCombo.getSelectedIndex()),
 					ProgramaGestão.usuarioAtual);
+			projetoSelecionado = projetosLista.get(projetosCombo.getSelectedIndex());
+			painelDetalhes.add(painelBotões, BorderLayout.EAST);
 			projetosPainel.add(painelDetalhes, BorderLayout.CENTER);
 		}
 
 		// Lógica para atualizar o painel a partir da seleção no menu
-		List<Projeto> projetosListaFinal = projetosLista;
 		projetosCombo.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -99,19 +129,22 @@ public class PainelPrincipal extends JFrame {
 				}
 
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					painelDetalhes = new DetalhesProjetoPanel(projetosListaFinal.get(projetosCombo.getSelectedIndex()),
+					painelDetalhes = new DetalhesProjetoPanel(projetosLista.get(projetosCombo.getSelectedIndex()),
 							ProgramaGestão.usuarioAtual);
+					projetoSelecionado = projetosLista.get(projetosCombo.getSelectedIndex());
+					painelDetalhes.add(painelBotões, BorderLayout.EAST);
 					projetosPainel.add(painelDetalhes, BorderLayout.CENTER);
 				}
 				projetosPainel.revalidate();
 			}
 		});
-
+		
 		painelAbas.addTab("Equipes", equipesPainel);
 		painelAbas.addTab("Projetos", projetosPainel);
 		add(botões, BorderLayout.NORTH);
 		add(painelAbas, BorderLayout.CENTER);
 
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Painel Principal");
 		setSize(500, 400);
@@ -119,4 +152,19 @@ public class PainelPrincipal extends JFrame {
 		setVisible(true);
 	}
 
+	private List<Projeto> getProjetos() {
+		// Se o usuário é Administrador, ele pode ver todos os projetos
+		if (ProgramaGestão.usuarioAtual.getNivel() == Nivel.ADMINISTRADOR) {
+			// Retorna os projetos e verifica se existe pelo menos um
+			List<Projeto> projetosDB = DatabaseDAO.getProjetos();
+			if (!(projetosDB == null)) return projetosDB;
+			
+		} else {
+			
+			// Retorna os projetos e verifica se existe pelo menos um
+			List<Projeto> projetosDB = DatabaseDAO.getProjetosUsuario(ProgramaGestão.usuarioAtual.getId());
+			if (!(projetosDB == null)) return projetosDB;
+		}
+		return new ArrayList<Projeto>();		
+	}
 }

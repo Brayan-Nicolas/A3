@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import main.DatabaseDAO;
 import main.Equipe;
 import main.Projeto.Projeto;
 import usuário.Nivel;
@@ -95,10 +96,7 @@ public class DetalhesProjetoPanel extends JPanel {
             btnAdicionarEquipe.addActionListener(e -> {
                 // Simulação da lista de todas as equipes existentes no sistema
                 // Em uma aplicação real, isso viria do seu EquipeService ou DAO
-                List<Equipe> todasAsEquipes = new ArrayList<>();
-                todasAsEquipes.add(new Equipe(1, "Equipe Alpha", "Equipe de desenvolvimento A"));
-                todasAsEquipes.add(new Equipe(2, "Equipe Beta", "Equipe de desenvolvimento B"));
-                todasAsEquipes.add(new Equipe(3, "Equipe de Teste", "Equipe de QA"));
+                List<Equipe> todasAsEquipes = DatabaseDAO.getEquipes();
 
                 // Cria um ComboBox com as equipes disponíveis
                 JComboBox<Equipe> comboEquipes = new JComboBox<>(todasAsEquipes.toArray(new Equipe[0]));
@@ -112,7 +110,7 @@ public class DetalhesProjetoPanel extends JPanel {
                     Equipe equipeSelecionada = (Equipe) comboEquipes.getSelectedItem();
                     if (equipeSelecionada != null) {
                         // Verifica se a equipe já não está no projeto
-                        if (!projeto.getEquipes().contains(equipeSelecionada)) {
+                        if (!projeto.getEquipes().stream().map(Equipe::getId).anyMatch(n -> n == equipeSelecionada.getId())) {
                             projeto.adicionarEquipe(equipeSelecionada);
                             modeloEquipes.addElement(equipeSelecionada);
                             JOptionPane.showMessageDialog(this,
@@ -128,7 +126,7 @@ public class DetalhesProjetoPanel extends JPanel {
             btnRemoverEquipe.addActionListener(e -> {
                 Equipe equipeSelecionada = listaEquipes.getSelectedValue();
                 if (equipeSelecionada != null) {
-                    projeto.getEquipes().remove(equipeSelecionada); // Remove a equipe do objeto Projeto
+                    projeto.removerEquipe(equipeSelecionada); // Remove a equipe do objeto Projeto
                     modeloEquipes.removeElement(equipeSelecionada); // Atualiza a GUI
                 } else {
                     JOptionPane.showMessageDialog(this, "Por favor, selecione uma equipe para remover.");
@@ -136,18 +134,11 @@ public class DetalhesProjetoPanel extends JPanel {
             });
         }
 
-    add(painelEquipes, BorderLayout.WEST);
+    add(painelEquipes, BorderLayout.CENTER);
 
         // --- Seção 3: Tarefas Relacionadas ---
-        JPanel painelTarefas = new JPanel(new BorderLayout());
-        painelTarefas.setBorder(BorderFactory.createTitledBorder("Tarefas"));
-
-        String[] tarefasExemplo = {"Tarefa 1: Desenvolver login", "Tarefa 2: Criar UI do painel", "Tarefa 3: Conectar API"};
-        listaTarefas = new JList<>(tarefasExemplo);
-        JScrollPane scrollTarefas = new JScrollPane(listaTarefas);
         
-        painelTarefas.add(scrollTarefas, BorderLayout.CENTER);
-
-        add(painelTarefas, BorderLayout.CENTER);
+        
+        
     }
 }

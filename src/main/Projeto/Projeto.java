@@ -32,6 +32,15 @@ public class Projeto {
         this.status = StatusProjeto.PLANEJAMENTO;
     }
     
+    public Projeto(String nome, String descricao, LocalDate dataDeInicio, LocalDate dataDeTerminoPrevisto, long gerenteId) {
+    	this.nome = nome;
+        this.descricao = descricao;
+        this.dataDeInicio = dataDeInicio;
+        this.dataDeTerminoPrevisto = dataDeTerminoPrevisto;
+        this.gerenteId = gerenteId;
+        this.equipes = DatabaseDAO.getEquipesProjeto(this.id);
+        this.status = StatusProjeto.PLANEJAMENTO;
+    }
    
     
     public String getNome() {
@@ -75,6 +84,7 @@ public class Projeto {
     }
 
     public List<Equipe> getEquipes() {
+    	if (this.equipes == null) return new ArrayList<Equipe>();
         return equipes;
     }
 
@@ -86,6 +96,24 @@ public class Projeto {
         if (this.equipes == null) {
             this.equipes = new ArrayList<>();
         }
+        DatabaseDAO.adicionarEquipeProjeto(this.id, novaEquipe.getId());
         this.equipes.add(novaEquipe);
     }
+
+	public void removerEquipe(Equipe equipe) {
+		if (this.equipes == null) {
+            this.equipes = new ArrayList<>();
+        }
+        DatabaseDAO.removerEquipeProjeto(this.id, equipe.getId());
+        this.equipes.remove(equipe);
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getId() {
+		return this.id;
+	}
+	
 }
