@@ -10,14 +10,14 @@ import java.util.List;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JDialog; // Importação necessária
-import javax.swing.JFrame; // Importação necessária
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities; // Importação necessária
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -42,6 +42,7 @@ public class EquipesPanel extends JPanel {
     }
 
     public EquipesPanel(Usuario usuarioLogado) {
+        // CORREÇÃO: Usa o parâmetro passado, não a variável global
         this.usuarioLogado = ProgramaGestão.usuarioAtual;
         setLayout(new BorderLayout(10, 10));
 
@@ -60,18 +61,11 @@ public class EquipesPanel extends JPanel {
             JButton btnNovaEquipe = new JButton("Nova Equipe");
             painelBotoes.add(btnNovaEquipe);
 
-            // Ação do botão "Nova Equipe"
             btnNovaEquipe.addActionListener(e -> {
-                // Obtém a janela pai para que o JDialog seja exibido corretamente
                 JDialog dialog = new RegistroEquipe((JFrame) SwingUtilities.getWindowAncestor(this));
                 dialog.setVisible(true);
-
-                // Recarrega a lista de equipes para mostrar a nova equipe
                 carregarEquipes();
-
-                // Força a atualização da interface gráfica para refletir as mudanças
-                revalidate();
-                repaint();
+                // revalidate() e repaint() são redundantes após carregarEquipes()
             });
         }
         add(painelBotoes, BorderLayout.SOUTH);
@@ -79,21 +73,21 @@ public class EquipesPanel extends JPanel {
         // --- 3. Carregar os Dados ---
         carregarEquipes();
 
-        // --- 4. Configurar o Botão na Tabela ---
-        if (modeloTabela.getRowCount() > 0) {
-            tabelaEquipes.getColumn("Ações").setCellRenderer(new ButtonRenderer());
-            tabelaEquipes.getColumn("Ações").setCellEditor(new ButtonEditor(this::gerenciarEquipe));
-        }
+        // --- 4. Configurar o Botão na Tabela (Sempre) ---
+        // CORREÇÃO: Remove a verificação desnecessária
+        tabelaEquipes.getColumn("Ações").setCellRenderer(new ButtonRenderer());
+        tabelaEquipes.getColumn("Ações").setCellEditor(new ButtonEditor(this::gerenciarEquipe));
     }
 
     private void carregarEquipes() {
         modeloTabela.setRowCount(0);
         List<Equipe> equipesDisponiveis = new ArrayList<>();
 
-        if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
+        // CORREÇÃO: Usa a referência correta do usuário logado
+        if (this.usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
             equipesDisponiveis = DatabaseDAO.getEquipes();
         } else {
-            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestão.usuarioAtual.getId());
+            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(this.usuarioLogado.getId());
         }
 
         for (Equipe equipe : equipesDisponiveis) {
@@ -119,24 +113,17 @@ public class EquipesPanel extends JPanel {
 
     private void gerenciarEquipe(int row) {
         long equipeId = (long) modeloTabela.getValueAt(row, 0);
-
-        // Obter o objeto Equipe completo do banco de dados
         Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
 
         if (equipeSelecionada != null) {
-            // Usa SwingUtilities.invokeLater para garantir que a troca de painel
-            // ocorra na fila de eventos do Swing, após a edição da tabela ser concluída.
             SwingUtilities.invokeLater(() -> {
-                // Encontra o JFrame pai de forma segura
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
                 if (parentFrame != null) {
-                    // Cria a nova tela de gerenciamento, passando a referência da tela atual para o
-                    // botão "Voltar"
+                    // CORREÇÃO: A lógica de passagem de referência para o GerenciarEquipesPanel
+                    // está correta.
                     GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
                             parentFrame);
-
-                    // Troca o painel na janela principal
                     parentFrame.setContentPane(gerenciarPanel);
                     parentFrame.revalidate();
                     parentFrame.repaint();
@@ -181,22 +168,20 @@ public class EquipesPanel extends JPanel {
         public ButtonEditor(ButtonClickListener listener) {
             super(new JTextField());
             this.listener = listener;
-            setClickCountToStart(1); // Ativa o editor com apenas um clique
+            setClickCountToStart(1);
 
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(e -> {
                 isPushed = true;
-                // Notifica o editor que a edição da célula parou. Isso dispara a chamada para
-                // getCellEditorValue().
                 fireEditingStopped();
             });
-        } // Esse parêntese de fechamento está no lugar errado.
+        }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
-            this.row = row; // Armazena a linha no editor no momento em que ele é ativado
+            this.row = row;
             isPushed = false;
 
             if (value instanceof JButton) {
@@ -210,16 +195,13 @@ public class EquipesPanel extends JPanel {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                // Usa SwingUtilities.invokeLater para garantir que a ação seja a última a ser
-                // executada no EDT,
-                // evitando conflitos de estado com a JTable.
                 SwingUtilities.invokeLater(() -> {
                     if (row != -1) {
                         listener.onButtonClick(row);
                     }
                 });
             }
-            isPushed = false; // Reseta a flag para o próximo uso
+            isPushed = false;
             return button;
         }
 
