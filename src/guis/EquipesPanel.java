@@ -167,19 +167,19 @@ public class EquipesPanel extends JPanel {
     private class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
         private final ButtonClickListener listener;
+        private int row; // Adicione uma variável para armazenar a linha
 
         public ButtonEditor(ButtonClickListener listener) {
             super(new JTextField());
             this.listener = listener;
-            setClickCountToStart(1); // Ativa o editor com apenas um clique
+            setClickCountToStart(1);
 
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Obtém a linha atual e notifica o ouvinte
-                    int row = tabelaEquipes.convertRowIndexToModel(tabelaEquipes.getEditingRow());
+                    // Usa a variável de instância `row` que foi salva
                     fireEditingStopped();
                     if (row != -1) {
                         listener.onButtonClick(row);
@@ -191,6 +191,9 @@ public class EquipesPanel extends JPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
+            // Salva a linha no editor ANTES da ação de clique
+            this.row = row;
+
             if (value instanceof JButton) {
                 button = (JButton) value;
             } else {
