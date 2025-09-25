@@ -116,23 +116,27 @@ public class EquipesPanel extends JPanel {
         Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
 
         if (equipeSelecionada != null) {
-            // Encontra o JFrame pai de forma segura
-            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            // Usa SwingUtilities.invokeLater para garantir que a troca de painel
+            // ocorra na fila de eventos do Swing, após a edição da tabela ser concluída.
+            SwingUtilities.invokeLater(() -> {
+                // Encontra o JFrame pai de forma segura
+                JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
-            if (parentFrame != null) {
-                // Cria a nova tela de gerenciamento, passando a referência da tela atual para o
-                // botão "Voltar"
-                GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
-                        this);
+                if (parentFrame != null) {
+                    // Cria a nova tela de gerenciamento, passando a referência da tela atual para o
+                    // botão "Voltar"
+                    GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
+                            this);
 
-                // Troca o painel na janela principal
-                parentFrame.setContentPane(gerenciarPanel);
-                parentFrame.revalidate();
-                parentFrame.repaint();
-            } else {
-                JOptionPane.showMessageDialog(this, "Janela principal não encontrada.", "Erro",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+                    // Troca o painel na janela principal
+                    parentFrame.setContentPane(gerenciarPanel);
+                    parentFrame.revalidate();
+                    parentFrame.repaint();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Janela principal não encontrada.", "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            });
         } else {
             JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
