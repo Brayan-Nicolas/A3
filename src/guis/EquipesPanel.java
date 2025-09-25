@@ -43,7 +43,7 @@ public class EquipesPanel extends JPanel {
 
     public EquipesPanel(Usuario usuarioLogado) {
         // CORREÇÃO: Usa o parâmetro passado, não a variável global
-        this.usuarioLogado = ProgramaGestão.usuarioAtual;
+        this.usuarioLogado = usuarioLogado;
         setLayout(new BorderLayout(10, 10));
 
         // --- 1. Tabela de Equipes ---
@@ -77,6 +77,28 @@ public class EquipesPanel extends JPanel {
         // CORREÇÃO: Remove a verificação desnecessária
         tabelaEquipes.getColumn("Ações").setCellRenderer(new ButtonRenderer());
         tabelaEquipes.getColumn("Ações").setCellEditor(new ButtonEditor(this::gerenciarEquipe));
+        tabelaEquipes.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tabelaEquipes.rowAtPoint(e.getPoint());
+                int column = tabelaEquipes.columnAtPoint(e.getPoint());
+                
+                if (column == tabelaEquipes.getColumnModel().getColumnIndex("Ações")) {
+                    // Prepara o renderizador para obter o componente visual
+                    Component component = tabelaEquipes.prepareRenderer(
+                        tabelaEquipes.getCellRenderer(row, column), row, column
+                    );
+                    
+                    if (component instanceof JButton) {
+                        // Verifica se o clique foi dentro da área do botão
+                        if (component.getBounds().contains(e.getPoint())) {
+                            // Chama o método de gerenciamento
+                            gerenciarEquipe(row);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void carregarEquipes() {
