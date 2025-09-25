@@ -161,6 +161,9 @@ public class EquipesPanel extends JPanel {
         }
     }
 
+    /**
+     * Editor para lidar com o clique no botão da célula da tabela.
+     */
     private class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
         private final ButtonClickListener listener;
@@ -174,14 +177,20 @@ public class EquipesPanel extends JPanel {
 
             button = new JButton();
             button.setOpaque(true);
-            // Remove o ActionListener do botão. A ação será gerenciada em getCellEditorValue()
-        }
+            button.addActionListener(e -> {
+                isPushed = true;
+                // Notifica o editor que a edição da célula parou. Isso dispara a chamada para
+                // getCellEditorValue().
+                fireEditingStopped();
+            });
+        } // Esse parêntese de fechamento está no lugar errado.
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            this.row = row;
-            isPushed = true; // Seta a flag para ser verificada ao parar a edição
-            
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+                int column) {
+            this.row = row; // Armazena a linha no editor no momento em que ele é ativado
+            isPushed = false;
+
             if (value instanceof JButton) {
                 button = (JButton) value;
             } else {
@@ -193,19 +202,31 @@ public class EquipesPanel extends JPanel {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                // Ação é executada APENAS depois que a edição é interrompida
-                // SwingUtilities.invokeLater garante que a ação de clique seja a última a ser processada
-                SwingUtilities.invokeLater(() -> listener.onButtonClick(row));
+                // Usa SwingUtilities.invokeLater para garantir que a ação seja a última a ser
+                // executada no EDT,
+                // evitando conflitos de estado com a JTable.
+                SwingUtilities.invokeLater(() -> {
+                    if (row != -1) {
+                        listener.onButtonClick(row);
+                    }
+                });
             }
-            isPushed = false;
+            isPushed = false; // Reseta a flag para o próximo uso
             return button;
         }
 
         @Override
         public boolean stopCellEditing() {
-            // Garante que a flag seja redefinida caso a edição seja interrompida sem um clique
             isPushed = false;
             return super.stopCellEditing();
+        }
+
+        /**
+         * Interface funcional para o ouvinte do botão.
+         */
+        @FunctionalInterface
+        private interface ButtonClickListener {
+            void onButtonClick(int row);
         }
     }
 }
