@@ -1,14 +1,10 @@
 package guis;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -16,14 +12,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 import main.DatabaseDAO;
 import main.Equipe;
-import main.ProgramaGestão;
 import usuário.Nivel;
 import usuário.Usuario;
 
@@ -33,16 +26,7 @@ public class EquipesPanel extends JPanel {
     private JTable tabelaEquipes;
     private DefaultTableModel modeloTabela;
 
-    /**
-     * Interface funcional para o ouvinte do botão.
-     */
-    @FunctionalInterface
-    private interface ButtonClickListener {
-        void onButtonClick(int row);
-    }
-
     public EquipesPanel(Usuario usuarioLogado) {
-        // CORREÇÃO: Usa o parâmetro passado, não a variável global
         this.usuarioLogado = usuarioLogado;
         setLayout(new BorderLayout(10, 10));
 
@@ -50,6 +34,7 @@ public class EquipesPanel extends JPanel {
         String[] colunas = { "ID", "Nome da Equipe", "Membros", "Ações" };
         modeloTabela = new DefaultTableModel(colunas, 0);
         tabelaEquipes = new JTable(modeloTabela);
+        // Desabilita a edição de células para evitar que o usuário altere o conteúdo
         tabelaEquipes.setDefaultEditor(Object.class, null);
         JScrollPane scrollPane = new JScrollPane(tabelaEquipes);
 
@@ -60,65 +45,41 @@ public class EquipesPanel extends JPanel {
         if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR || usuarioLogado.getNivel() == Nivel.GERENTE) {
             JButton btnNovaEquipe = new JButton("Nova Equipe");
             painelBotoes.add(btnNovaEquipe);
-
             btnNovaEquipe.addActionListener(e -> {
                 JDialog dialog = new RegistroEquipe((JFrame) SwingUtilities.getWindowAncestor(this));
                 dialog.setVisible(true);
                 carregarEquipes();
-                // revalidate() e repaint() são redundantes após carregarEquipes()
             });
         }
         add(painelBotoes, BorderLayout.SOUTH);
 
-        // --- 3. Carregar os Dados ---
+        // --- 3. Carregar os Dados e popular a tabela ---
         carregarEquipes();
-
-        // --- 4. Configurar o Botão na Tabela (Sempre) ---
-        // CORREÇÃO: Remove a verificação desnecessária
-        tabelaEquipes.getColumn("Ações").setCellRenderer(new ButtonRenderer());
-        tabelaEquipes.getColumn("Ações").setCellEditor(new ButtonEditor(this::gerenciarEquipe));
-        tabelaEquipes.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = tabelaEquipes.rowAtPoint(e.getPoint());
-                int column = tabelaEquipes.columnAtPoint(e.getPoint());
-                
-                if (column == tabelaEquipes.getColumnModel().getColumnIndex("Ações")) {
-                    // Prepara o renderizador para obter o componente visual
-                    Component component = tabelaEquipes.prepareRenderer(
-                        tabelaEquipes.getCellRenderer(row, column), row, column
-                    );
-                    
-                    if (component instanceof JButton) {
-                        // Verifica se o clique foi dentro da área do botão
-                        if (component.getBounds().contains(e.getPoint())) {
-                            // Chama o método de gerenciamento
-                            gerenciarEquipe(row);
-                        }
-                    }
-                }
-            }
-        });
     }
 
     private void carregarEquipes() {
         modeloTabela.setRowCount(0);
         List<Equipe> equipesDisponiveis = new ArrayList<>();
 
-        // CORREÇÃO: Usa a referência correta do usuário logado
         if (this.usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
             equipesDisponiveis = DatabaseDAO.getEquipes();
         } else {
             equipesDisponiveis = DatabaseDAO.getEquipesUsuario(this.usuarioLogado.getId());
         }
 
+        int row = 0;
         for (Equipe equipe : equipesDisponiveis) {
+            // Cria uma nova instância do botão para cada linha.
+            // A classe interna tem acesso direto ao método 'gerenciarEquipe'.
+            JButton gerenciarButton = new GerenciarEquipeButton(row);
+
             modeloTabela.addRow(new Object[] {
                     equipe.getId(),
                     equipe.getNome(),
                     formatarMembros(equipe.getMembros()),
-                    new JButton("Gerenciar")
+                    gerenciarButton
             });
+            row++;
         }
     }
 
@@ -133,8 +94,8 @@ public class EquipesPanel extends JPanel {
         return sb.toString();
     }
 
-    private void gerenciarEquipe(int row) {
-        System.out.println("Método gerenciarEquipe acionado para a linha: " + row);
+    // Este método é público para ser acessado pela classe interna do botão.
+    public void gerenciarEquipe(int row) {
         long equipeId = (long) modeloTabela.getValueAt(row, 0);
         Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
 
@@ -142,11 +103,8 @@ public class EquipesPanel extends JPanel {
             SwingUtilities.invokeLater(() -> {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
                 if (parentFrame != null) {
-                    // CORREÇÃO: A lógica de passagem de referência para o GerenciarEquipesPanel
-                    // está correta.
                     GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
                             parentFrame);
-                    System.out.println("Criando e exibindo GerenciarEquipesPanel.");
                     parentFrame.setContentPane(gerenciarPanel);
                     parentFrame.revalidate();
                     parentFrame.repaint();
@@ -161,77 +119,22 @@ public class EquipesPanel extends JPanel {
     }
 
     /**
-     * Renderizador para exibir o JButton na célula da tabela.
+     * Classe interna para o botão "Gerenciar".
+     * Ela tem acesso direto aos membros da classe EquipesPanel e encapsula a lógica
+     * de clique.
      */
-    private class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
+    private class GerenciarEquipeButton extends JButton {
 
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            if (value instanceof JButton) {
-                return (JButton) value;
-            }
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
+        private final int row;
 
-    /**
-     * Editor para lidar com o clique no botão da célula da tabela.
-     */
-    private class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
-        private final ButtonClickListener listener;
-        private int row;
-        private boolean isPushed;
-
-        public ButtonEditor(ButtonClickListener listener) {
-            super(new JTextField());
-            this.listener = listener;
-            setClickCountToStart(1);
-
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(e -> {
-                isPushed = true;
-                fireEditingStopped();
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
-                int column) {
+        public GerenciarEquipeButton(int row) {
+            super("Gerenciar");
             this.row = row;
-            isPushed = false;
 
-            if (value instanceof JButton) {
-                button = (JButton) value;
-            } else {
-                button.setText((value == null) ? "" : value.toString());
-            }
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                SwingUtilities.invokeLater(() -> {
-                    if (row != -1) {
-                        listener.onButtonClick(row);
-                    }
-                });
-            }
-            isPushed = false;
-            return button;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
+            // Adiciona a ação do botão. O método gerenciarEquipe() é acessado diretamente.
+            addActionListener(e -> {
+                gerenciarEquipe(this.row);
+            });
         }
     }
 }
