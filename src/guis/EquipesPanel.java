@@ -174,21 +174,14 @@ public class EquipesPanel extends JPanel {
 
             button = new JButton();
             button.setOpaque(true);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    isPushed = true; // Seta a flag para indicar que o botão foi clicado
-                    fireEditingStopped(); // Força a parada da edição
-                }
-            });
+            // Remove o ActionListener do botão. A ação será gerenciada em getCellEditorValue()
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
-                int column) {
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             this.row = row;
-            isPushed = false;
-
+            isPushed = true; // Seta a flag para ser verificada ao parar a edição
+            
             if (value instanceof JButton) {
                 button = (JButton) value;
             } else {
@@ -201,7 +194,8 @@ public class EquipesPanel extends JPanel {
         public Object getCellEditorValue() {
             if (isPushed) {
                 // Ação é executada APENAS depois que a edição é interrompida
-                listener.onButtonClick(row);
+                // SwingUtilities.invokeLater garante que a ação de clique seja a última a ser processada
+                SwingUtilities.invokeLater(() -> listener.onButtonClick(row));
             }
             isPushed = false;
             return button;
@@ -209,16 +203,9 @@ public class EquipesPanel extends JPanel {
 
         @Override
         public boolean stopCellEditing() {
+            // Garante que a flag seja redefinida caso a edição seja interrompida sem um clique
             isPushed = false;
             return super.stopCellEditing();
         }
-    }
-
-    /**
-     * Interface funcional para o ouvinte do botão.
-     */
-    @FunctionalInterface
-    private interface ButtonClickListener {
-        void onButtonClick(int row);
     }
 }
