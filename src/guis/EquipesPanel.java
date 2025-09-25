@@ -112,18 +112,19 @@ public class EquipesPanel extends JPanel {
     }
 
     private void gerenciarEquipe(int row) {
+        System.out.println("Método gerenciarEquipe acionado para a linha: " + row);
         long equipeId = (long) modeloTabela.getValueAt(row, 0);
         Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
 
         if (equipeSelecionada != null) {
             SwingUtilities.invokeLater(() -> {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
                 if (parentFrame != null) {
                     // CORREÇÃO: A lógica de passagem de referência para o GerenciarEquipesPanel
                     // está correta.
                     GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
                             parentFrame);
+                    System.out.println("Criando e exibindo GerenciarEquipesPanel.");
                     parentFrame.setContentPane(gerenciarPanel);
                     parentFrame.revalidate();
                     parentFrame.repaint();
