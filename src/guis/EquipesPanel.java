@@ -33,6 +33,14 @@ public class EquipesPanel extends JPanel {
     private JTable tabelaEquipes;
     private DefaultTableModel modeloTabela;
 
+    /**
+     * Interface funcional para o ouvinte do botão.
+     */
+    @FunctionalInterface
+    private interface ButtonClickListener {
+        void onButtonClick(int row);
+    }
+
     public EquipesPanel(Usuario usuarioLogado) {
         this.usuarioLogado = ProgramaGestão.usuarioAtual;
         setLayout(new BorderLayout(10, 10));
@@ -126,7 +134,7 @@ public class EquipesPanel extends JPanel {
                     // Cria a nova tela de gerenciamento, passando a referência da tela atual para o
                     // botão "Voltar"
                     GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
-                            this);
+                            parentFrame);
 
                     // Troca o painel na janela principal
                     parentFrame.setContentPane(gerenciarPanel);
@@ -219,14 +227,6 @@ public class EquipesPanel extends JPanel {
         public boolean stopCellEditing() {
             isPushed = false;
             return super.stopCellEditing();
-        }
-
-        /**
-         * Interface funcional para o ouvinte do botão.
-         */
-        @FunctionalInterface
-        private interface ButtonClickListener {
-            void onButtonClick(int row);
         }
     }
 }

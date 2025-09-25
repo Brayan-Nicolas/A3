@@ -28,7 +28,8 @@ public class GerenciarEquipesPanel extends JPanel {
 
     private Equipe equipe;
     private Usuario usuarioLogado;
-    private EquipesPanel equipesPanel; // Adicionando uma referência ao painel principal
+    // CORREÇÃO: Declarar a referência do JFrame pai como um campo da classe
+    private JFrame parentFrame;
 
     private JTextField txtNome;
     private JTextArea txtDescricao;
@@ -36,13 +37,14 @@ public class GerenciarEquipesPanel extends JPanel {
     private DefaultListModel<Usuario> modeloMembros;
 
     private JButton btnSalvar, btnAdicionarMembro, btnRemoverMembro;
-    private JButton btnVoltar; // O novo botão
+    private JButton btnVoltar;
 
     // Construtor agora recebe o usuário logado e a referência ao painel principal
-    public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, EquipesPanel equipesPanel) {
+    public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, JFrame parentFrame) {
         this.equipe = equipe;
-        this.usuarioLogado = ProgramaGestão.usuarioAtual;
-        this.equipesPanel = equipesPanel; 
+        // CORREÇÃO: Usar o usuário passado no construtor em vez da variável global
+        this.usuarioLogado = usuarioLogado;
+        this.parentFrame = parentFrame;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -75,7 +77,7 @@ public class GerenciarEquipesPanel extends JPanel {
         // --- 3. Botões de ação, incluindo o novo botão Voltar ---
         JPanel painelBotoesAcao = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnSalvar = new JButton("Salvar Alterações");
-        btnVoltar = new JButton("Voltar"); // Instanciando o botão Voltar
+        btnVoltar = new JButton("Voltar");
 
         painelBotoesAcao.add(btnSalvar);
         painelBotoesAcao.add(btnVoltar);
@@ -112,7 +114,17 @@ public class GerenciarEquipesPanel extends JPanel {
         btnSalvar.addActionListener(e -> salvarAlteracoes());
         btnAdicionarMembro.addActionListener(e -> adicionarMembro());
         btnRemoverMembro.addActionListener(e -> removerMembro());
-        btnVoltar.addActionListener(e -> voltarAoEquipesPanel()); // Adicionando a ação do botão Voltar
+
+        // CORREÇÃO: Lógica para o botão Voltar
+        btnVoltar.addActionListener(e -> {
+            // Cria uma nova instância do EquipesPanel, passando o usuário logado
+            EquipesPanel equipesPanel = new EquipesPanel(usuarioLogado);
+
+            // Troca o painel no JFrame pai e atualiza a interface
+            parentFrame.setContentPane(equipesPanel);
+            parentFrame.revalidate();
+            parentFrame.repaint();
+        });
     }
 
     private void aplicarRestricoesDeAcesso() {
@@ -127,16 +139,13 @@ public class GerenciarEquipesPanel extends JPanel {
         btnRemoverMembro.setEnabled(podeModificar);
     }
 
-    // Método que implementa a navegação
-    private void voltarAoEquipesPanel() {
-        // Pega o contêiner pai, que deve ser o seu JFrame ou um JPanel intermediário
-        this.getParent().add(equipesPanel);
-        this.setVisible(false); // Oculta o painel atual
-        equipesPanel.setVisible(true); // Exibe o painel principal
-        this.getParent().remove(this); // Remove o painel atual para liberar memória
-        this.getParent().revalidate();
-        this.getParent().repaint();
-    }
+    // CORREÇÃO: Este método é redundante e deve ser removido, pois a lógica
+    // foi movida para o ActionListener do botão Voltar.
+    /*
+     * private void voltarAoEquipesPanel() {
+     * // ...
+     * }
+     */
 
     // --- Ações dos Botões ---
     private void salvarAlteracoes() {
