@@ -54,6 +54,10 @@ public class EquipesPanel extends JPanel {
 
                 // Recarrega a lista de equipes para mostrar a nova equipe
                 carregarEquipes();
+
+                // Força a atualização da interface gráfica para refletir as mudanças
+                revalidate();
+                repaint();
             });
         }
         add(painelBotoes, BorderLayout.SOUTH);
@@ -100,30 +104,33 @@ public class EquipesPanel extends JPanel {
     }
 
     private void gerenciarEquipe(int row) {
-    long equipeId = (long) modeloTabela.getValueAt(row, 0);
+        long equipeId = (long) modeloTabela.getValueAt(row, 0);
 
-    // Obter o objeto Equipe completo do banco de dados
-    Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
+        // Obter o objeto Equipe completo do banco de dados
+        Equipe equipeSelecionada = DatabaseDAO.getEquipePorId(equipeId);
 
-    if (equipeSelecionada != null) {
-        // Encontra o JFrame pai de forma segura
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        
-        if (parentFrame != null) {
-            // Cria a nova tela de gerenciamento, passando a referência da tela atual para o botão "Voltar"
-            GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado, this);
+        if (equipeSelecionada != null) {
+            // Encontra o JFrame pai de forma segura
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
-            // Troca o painel na janela principal
-            parentFrame.setContentPane(gerenciarPanel);
-            parentFrame.revalidate();
-            parentFrame.repaint();
+            if (parentFrame != null) {
+                // Cria a nova tela de gerenciamento, passando a referência da tela atual para o
+                // botão "Voltar"
+                GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado,
+                        this);
+
+                // Troca o painel na janela principal
+                parentFrame.setContentPane(gerenciarPanel);
+                parentFrame.revalidate();
+                parentFrame.repaint();
+            } else {
+                JOptionPane.showMessageDialog(this, "Janela principal não encontrada.", "Erro",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Janela principal não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
-    } else {
-        JOptionPane.showMessageDialog(this, "Equipe não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
     }
-}
 
     /**
      * Renderizador para exibir o JButton na célula da tabela.
