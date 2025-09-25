@@ -1,11 +1,9 @@
 package guis;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.swing.JButton;
 import javax.swing.JDialog; // Importação necessária
@@ -16,13 +14,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities; // Importação necessária
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.AbstractCellEditor;
-import javax.swing.table.TableCellEditor;
 
 import main.DatabaseDAO;
 import main.Equipe;
-import main.ProgramaGestao;
+import main.ProgramaGestão;
 import usuário.Nivel;
 import usuário.Usuario;
 
@@ -80,7 +75,7 @@ public class EquipesPanel extends JPanel {
         if (usuarioLogado.getNivel() == Nivel.ADMINISTRADOR) {
             equipesDisponiveis = DatabaseDAO.getEquipes();
         } else {
-            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestao.usuarioAtual.getId());
+            equipesDisponiveis = DatabaseDAO.getEquipesUsuario(ProgramaGestão.usuarioAtual.getId());
         }
 
         for (Equipe equipe : equipesDisponiveis) {
@@ -112,7 +107,7 @@ public class EquipesPanel extends JPanel {
         
         if (equipeSelecionada != null) {
             // Cria a nova tela de gerenciamento, passando a referência da tela atual para o botão "Voltar"
-            GerenciarEquipePanel gerenciarPanel = new GerenciarEquipePanel(equipeSelecionada, usuarioLogado, this);
+            GerenciarEquipesPanel gerenciarPanel = new GerenciarEquipesPanel(equipeSelecionada, usuarioLogado, this);
             
             // Troca o painel na janela principal
             parentFrame.setContentPane(gerenciarPanel);

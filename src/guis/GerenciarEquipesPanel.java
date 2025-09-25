@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -19,10 +20,10 @@ import javax.swing.JTextField;
 
 import main.DatabaseDAO;
 import main.Equipe;
-import usuario.Nivel;
-import usuario.Usuario;
+import usuário.Nivel;
+import usuário.Usuario;
 
-public class GerenciarEquipePanel extends JPanel {
+public class GerenciarEquipesPanel extends JPanel {
 
     private Equipe equipe;
     private Usuario usuarioLogado;
@@ -37,7 +38,7 @@ public class GerenciarEquipePanel extends JPanel {
     private JButton btnVoltar; // O novo botão
 
     // Construtor agora recebe o usuário logado e a referência ao painel principal
-    public GerenciarEquipePanel(Equipe equipe, Usuario usuarioLogado, JPanel painelPrincipal) {
+    public GerenciarEquipesPanel(Equipe equipe, Usuario usuarioLogado, PainelPrincipal painelPrincipal) {
         this.equipe = equipe;
         this.usuarioLogado = usuarioLogado;
         this.painelPrincipal = painelPrincipal; 
@@ -182,7 +183,7 @@ public class GerenciarEquipePanel extends JPanel {
                             JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                boolean sucesso = DatabaseDAO.adicionarMembro(equipe.getId(), usuarioSelecionado.getId());
+                boolean sucesso = DatabaseDAO.adicionarUsuarioEquipe(equipe.getId(), usuarioSelecionado.getId());
                 if (sucesso) {
                     JOptionPane.showMessageDialog(this, "Membro adicionado com sucesso!");
                     equipe.getMembros().add(usuarioSelecionado);
@@ -202,7 +203,7 @@ public class GerenciarEquipePanel extends JPanel {
                     membroSelecionado.getNome() + "?", "Confirmar Remoção", JOptionPane.YES_NO_OPTION);
 
             if (confirmacao == JOptionPane.YES_OPTION) {
-                boolean sucesso = DatabaseDAO.removerMembro(equipe.getId(), membroSelecionado.getId());
+                boolean sucesso = DatabaseDAO.removerUsuarioEquipe(equipe.getId(), membroSelecionado.getId());
                 if (sucesso) {
                     JOptionPane.showMessageDialog(this, "Membro removido com sucesso!");
                     equipe.getMembros().remove(membroSelecionado);

@@ -25,7 +25,13 @@ public class Equipe {
     	this.membros = DatabaseDAO.getUsuariosEquipe(this.id);
     }
 
-    // Métodos de Gerenciamento de Membros
+    public Equipe(String nome, String descricao) {
+		this.nome = nome;
+		this.descricao = descricao;
+		this.membros = DatabaseDAO.getUsuariosEquipe(this.id);
+	}
+
+	// Métodos de Gerenciamento de Membros
     public void adicionarMembro(Usuario novoMembro) {
         if (novoMembro != null && !this.membros.contains(novoMembro)) {
             this.membros.add(novoMembro);
@@ -61,5 +67,20 @@ public class Equipe {
 
 	public long getId() {
 		return this.id;
+	}
+
+	public void setId(long novoId) {
+		this.id = novoId;
+		
+	}
+
+	public void setNome(String novoNome) {
+		this.nome = novoNome;
+		
+	}
+
+	public void setDescricao(String novaDescricao) {
+		this.descricao = novaDescricao;
+		
 	}
 }

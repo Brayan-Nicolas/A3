@@ -62,10 +62,10 @@ public class DatabaseDAO {
 			String sql = "INSERT INTO usuarios (nome, cpf, email, cargo, login, senha, nivel) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 			stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, usuario.getNome());
+			stmt.setString(1, Utilidades.primeiraMaiuscula(usuario.getNome()));
 			stmt.setString(2, usuario.getCpf());
 			stmt.setString(3, usuario.getEmail());
-			stmt.setString(4, usuario.getCargo());
+			stmt.setString(4, Utilidades.primeiraMaiuscula(usuario.getCargo()));
 			stmt.setString(5, usuario.getLogin());
 			stmt.setString(6, usuario.getSenha());
 			stmt.setString(7, usuario.getNivel().toString());
@@ -212,13 +212,14 @@ public class DatabaseDAO {
 
             // Itera sobre o conjunto de resultados
             while (rs.next()) {
-                long id = rs.getLong("id");
-                String nome = rs.getString("nome");
-                String login = rs.getString("login");
-                // Recupera outras colunas necessárias para o objeto Usuario
-                
-                Usuario usuario = new Usuario(id, nome, login);
-                usuarios.add(usuario);
+            	long idUsuario = rs.getInt("id");
+				String nome = rs.getString("nome");
+				String cpf = rs.getString("cpf");
+				String email = rs.getString("email");
+				String cargo = rs.getString("cargo");
+				Nivel nivel = Nivel.valueOf(rs.getString("nivel"));
+
+				usuarios.add(new Usuario(idUsuario, nome, cpf, email, cargo, nivel));
             }
         } catch (SQLException e) {
             e.printStackTrace();
